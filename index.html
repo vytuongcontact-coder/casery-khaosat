@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hồ sơ khảo sát người chơi game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cabin:wght@500;700&family=Inter:wght@400;500;600&family=Marcellus&display=swap" rel="stylesheet">
+<style>
+:root{
+  --maroon:#861010; --maroon-2:#A3523F; --gold:#C9A55A; --green:#1C3E33; --green-2:#24493D;
+  --cream:#F6E9CE; --paper:#FBF6EA; --line:#D9C49A; --pink:#FDECEF; --ink:#2B2B2B; --quiet:#5E5E5E;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{background:#142D25}
+body{
+  min-height:100vh; color:var(--ink); font:16px/1.5 Inter,Arial,sans-serif;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.025) 0 1px, transparent 1px 34px),
+    radial-gradient(ellipse at 50% 0%, #2A5646 0%, var(--green) 60%, #142D25 100%);
+  background-attachment:fixed;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+.preview{background:var(--gold);color:#2B2B2B;text-align:center;font:600 13px Inter,sans-serif;padding:6px 12px}
+.top{max-width:680px;margin:0 auto;padding:18px 18px 4px;color:var(--cream)}
+.brand{display:flex;justify-content:space-between;align-items:baseline;font:700 12px Cabin,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.brand .pct{color:var(--cream);letter-spacing:.06em}
+.track{position:relative;display:flex;justify-content:space-between;align-items:center;margin:14px 6px 6px}
+.track::before{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(246,233,206,.22);transform:translateY(-50%)}
+.track .fill{position:absolute;left:0;top:50%;height:2px;background:var(--gold);transform:translateY(-50%);transition:width .4s ease}
+.dot{position:relative;z-index:1;width:22px;height:22px;border-radius:50%;border:2px solid rgba(246,233,206,.35);background:var(--green);display:grid;place-items:center;font:700 10px Cabin,sans-serif;color:rgba(246,233,206,.6);transition:all .3s}
+.dot.cur{border-color:var(--gold);color:var(--gold);transform:scale(1.15)}
+.dot.done{background:var(--maroon);border-color:var(--maroon);color:#fff}
+.chapname{font:500 13px Inter,sans-serif;color:rgba(246,233,206,.8);margin-top:4px;min-height:20px}
+
+.stage{max-width:680px;margin:0 auto;padding:10px 14px 48px}
+.card{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:48px 28px 24px;box-shadow:0 18px 40px rgba(0,0,0,.35),0 2px 0 rgba(0,0,0,.08)}
+.card::after{content:"";position:absolute;inset:0;border-radius:6px;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent 30%)}
+.clip{position:absolute;top:-18px;left:22px;width:20px;height:50px}
+.tab{position:absolute;top:-13px;right:22px;background:var(--green);color:var(--cream);font:700 11px Cabin,sans-serif;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:4px}
+.enter{animation:enter .32s ease both}
+.enter-back{animation:enterBack .32s ease both}
+@keyframes enter{from{opacity:0;transform:translateX(26px) rotate(.6deg)}to{opacity:1;transform:none}}
+@keyframes enterBack{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.enter,.enter-back,.stamp{animation:none!important}}
+
+.qnum{font:700 12px Cabin,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--maroon)}
+.qtext{font:600 21px/1.4 Inter,sans-serif;margin:8px 0 6px;color:var(--ink)}
+.qhint{font-size:13.5px;color:var(--quiet);margin-bottom:16px}
+.qhint.flash{color:var(--maroon);font-weight:600}
+
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1.5px solid #E3D6B8;border-radius:8px;padding:12px 14px;min-height:50px;transition:border-color .15s,background .15s,transform .1s}
+.opt:hover{border-color:var(--maroon-2)}
+.opt:active{transform:scale(.99)}
+.opt .k{flex:none;width:26px;height:26px;border-radius:5px;border:1.5px solid #CDBB93;display:grid;place-items:center;font:700 12px Cabin,sans-serif;color:var(--quiet)}
+.opt.multi .k{border-radius:50%}
+.opt.sel{border-color:var(--maroon);background:var(--pink)}
+.opt.sel .k{background:var(--maroon);border-color:var(--maroon);color:#fff}
+.opt .lbl{flex:1}
+.other{margin:-2px 0 2px 38px}
+input.txt,textarea.txt{width:100%;font:16px Inter,sans-serif;border:1.5px solid #E3D6B8;border-radius:8px;padding:11px 12px;background:#fff;color:var(--ink)}
+input.txt:focus,textarea.txt:focus{outline:none;border-color:var(--maroon)}
+textarea.txt{min-height:120px;resize:vertical}
+
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.sbtn{background:#fff;border:1.5px solid #E3D6B8;border-radius:8px;height:54px;font:700 19px Cabin,sans-serif;color:var(--ink);transition:all .15s}
+.sbtn:hover{border-color:var(--maroon-2)}
+.sbtn.sel{background:var(--maroon);border-color:var(--maroon);color:#fff}
+.ends{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;color:var(--quiet);margin-top:7px}
+.ends span:last-child{text-align:right}
+
+.grow{padding:14px 0;border-top:1px dashed #DCCDAA}
+.grow:first-child{border-top:none;padding-top:2px}
+.gtext{font-weight:500;margin-bottom:9px}
+.gtext b{font:700 13px Cabin,sans-serif;color:var(--maroon);margin-right:6px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{background:#fff;border:1.5px solid #E3D6B8;border-radius:20px;padding:7px 13px;font-size:14px;transition:all .15s}
+.chip.sel{background:var(--maroon);border-color:var(--maroon);color:#fff}
+.glegend{font-size:12.5px;color:var(--quiet);margin:-6px 0 8px}
+
+.nums{display:flex;flex-direction:column;gap:14px}
+.nrow label{display:block;font-weight:500;margin-bottom:6px}
+.nrow label b{font:700 13px Cabin,sans-serif;color:var(--maroon);margin-right:6px}
+.nwrap{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
+.nwrap input{max-width:150px}
+.nwrap .unit{font-size:14px;color:var(--quiet);white-space:nowrap}
+.nwrap .vnd{font:600 14px Inter,sans-serif;color:var(--green);white-space:nowrap}
+.warn{margin-top:14px;font-size:14px;color:var(--maroon);font-weight:500}
+
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:24px;gap:12px}
+.back{background:none;border:none;color:var(--quiet);padding:8px 2px;font-size:14.5px}
+.back:hover{color:var(--maroon)}
+.back[hidden]{visibility:hidden;display:block}
+.next{background:var(--maroon);color:#fff;border:none;border-radius:8px;padding:12px 26px;font:700 15px Cabin,sans-serif;letter-spacing:.04em;transition:opacity .15s,transform .1s}
+.next:active{transform:scale(.98)}
+.next:disabled{opacity:.35;cursor:not-allowed}
+.kbd{font-size:12px;color:var(--quiet);text-align:center;margin-top:12px}
+@media (hover:none){.kbd{display:none}}
+
+/* intro and chapter */
+.cover .file{font:700 12px Cabin,sans-serif;letter-spacing:.16em;color:var(--maroon);text-transform:uppercase}
+.cover h1{font:400 31px/1.25 Marcellus,Georgia,serif;margin:10px 0 14px;color:var(--ink)}
+.cover p{margin:0 0 12px;color:#3a3a3a}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin:18px 0 4px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font:600 13.5px Inter,sans-serif;color:var(--green)}
+.chapter{text-align:center;padding:46px 28px 30px}
+.chapter .n{font:700 13px Cabin,sans-serif;letter-spacing:.2em;color:var(--maroon);text-transform:uppercase}
+.chapter h2{font:400 32px/1.2 Marcellus,Georgia,serif;margin:12px 0 10px}
+.chapter p{color:var(--quiet);margin:0 auto;max-width:420px}
+.chapter .nav{justify-content:center;flex-direction:column}
+.chapter .back{order:2}
+
+.concept{border-left:3px solid var(--maroon);padding:4px 0 4px 18px;margin:6px 0 4px}
+.concept h3{font:400 26px Marcellus,Georgia,serif;margin:0 0 10px;color:var(--maroon)}
+.concept p{margin:0 0 10px}
+.video{position:relative;padding-top:56.25%;border-radius:6px;overflow:hidden;background:#000;margin-bottom:12px}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
+/* end */
+.end{text-align:center;padding:44px 26px 30px}
+.stamp{display:inline-block;border:3px solid var(--maroon);color:var(--maroon);font:700 22px Cabin,sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:8px 18px;border-radius:6px;transform:rotate(-7deg);animation:stamp .55s cubic-bezier(.2,1.6,.4,1) both;opacity:.92}
+@keyframes stamp{0%{transform:scale(2.2) rotate(-14deg);opacity:0}100%{transform:rotate(-7deg);opacity:.92}}
+.end h2{font:400 28px Marcellus,Georgia,serif;margin:22px 0 8px}
+.end p{color:#3a3a3a;max-width:440px;margin:0 auto 10px}
+.idcard{margin:26px auto 6px;max-width:400px;text-align:left;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.idcard .hd{background:var(--green);color:var(--cream);font:700 11px Cabin,sans-serif;letter-spacing:.16em;text-transform:uppercase;padding:9px 16px;display:flex;justify-content:space-between}
+.idcard .bd{padding:16px}
+.idcard .role{font:400 23px Marcellus,Georgia,serif;color:var(--maroon)}
+.idcard .desc{font-size:14px;color:var(--quiet);margin:4px 0 12px}
+.idcard dl{display:grid;grid-template-columns:minmax(100px,38%) 1fr;gap:6px 14px;margin:0;font-size:13.5px}
+.idcard dt{color:var(--quiet)}
+.idcard dd{margin:0;font-weight:500}
+.share{margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.ghost{background:none;border:1.5px solid var(--maroon);color:var(--maroon);border-radius:8px;padding:10px 20px;font:700 14px Cabin,sans-serif}
+.small{font-size:13px;color:var(--quiet)}
+.err{color:var(--maroon);font-weight:600}
+.spinner{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--maroon);border-radius:50%;margin:10px auto 16px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (max-width:520px){
+  .card{padding:44px 18px 20px}
+  .qtext{font-size:19px}
+  .cover h1{font-size:26px}
+  .chapter h2{font-size:27px}
+  .dot{width:18px;height:18px;font-size:9px}
+  .sbtn{height:50px}
+}
+</style>
+</head>
+<body>
+<div id="preview" class="preview" hidden>Bản xem trước: câu trả lời không được gửi đi</div>
+<header class="top" id="top" hidden>
+  <div class="brand"><span>Hồ sơ khảo sát</span><span class="pct" id="pct">0%</span></div>
+  <div class="track" id="track"><div class="fill" id="fill"></div></div>
+  <div class="chapname" id="chapname"></div>
+</header>
+<main class="stage"><div id="app"></div></main>
+
+<script>
+/* ====== CẤU HÌNH ====== */
+const CONFIG = {
+  // Dán URL Web App của Google Apps Script (kết thúc bằng /exec). Để trống = chế độ xem trước, không gửi dữ liệu.
+  endpoint: 'https://script.google.com/macros/s/AKfycbwbcWmj2uJ8GQqSkXd3grOpYIiXgZqe2fEVGVvfaP3fllI4SotifB4r8IXmdGHHrxqY/exec',
+  // Link nhúng YouTube của trailer, ví dụ https://www.youtube.com/embed/MA_VIDEO . Để trống thì hiện đoạn mô tả.
+  trailerUrl: '',
+  version: 'phase1-v1'
+};
+
+/* ====== BẢNG HỎI ====== */
+const AGREE = ['Hoàn toàn không đồng ý', 'Hoàn toàn đồng ý'];
+const CHAPTERS = [null,
+  {t:'Vài câu mở đầu', d:'Xác nhận để bắt đầu.'},
+  {t:'Về bạn', d:'Ba câu ngắn về bạn.'},
+  {t:'Bạn chơi game thế nào', d:'Thiết bị, thể loại và những hoạt động bạn hay tham gia.'},
+  {t:'Chơi cùng người khác', d:'Những lần bạn chơi game cùng bạn bè và người quen.'},
+  {t:'Thời gian chơi', d:'Một buổi chơi dài bao lâu thì vừa.'},
+  {t:'Phối hợp và giao tiếp', d:'Chuyện thường xảy ra khi chơi theo nhóm.'},
+  {t:'Chi tiêu cho game', d:'Bạn đã trả tiền cho gì và muốn trả theo cách nào.'},
+  {t:'Tìm game mới', d:'Bạn biết đến game mới từ đâu.'},
+  {t:'Một ý tưởng game', d:'Xem giới thiệu một game nhóm đang phát triển, rồi cho nhóm biết bạn nghĩ gì.'}
+];
+const OBST = ['Khó thống nhất giờ chơi','Không đủ người','Mỗi người dùng máy hoặc nền tảng khác nhau','Bạn bè không thích cùng một game','Mỗi người phải tự mua game','Máy yếu hoặc mạng lag','Không ai chịu đứng ra rủ'];
+const playsWithOthers = A => A.q14 && A.q14 !== 'Không';
+const obstaclesChosen = A => (A.q19 || []).filter(v => v !== 'Không gặp trở ngại nào');
+
+const Q = [
+ {id:'q1',sec:1,type:'single',text:'Bạn đồng ý để câu trả lời được dùng ẩn danh cho đồ án môn học?',opts:['Đồng ý',{v:'Không đồng ý',end:'declined'}]},
+ {id:'q2',sec:1,type:'single',text:'Trong 3 tháng qua, bạn có chơi game điện tử trên bất kỳ thiết bị nào không?',opts:['Có',{v:'Không',end:'screened'}]},
+ {id:'q3',sec:1,type:'single',text:'Bạn bao nhiêu tuổi?',opts:['Dưới 16','16–18','19–24','25–30','31–40','Trên 40']},
+
+ {id:'q4',sec:2,type:'single',text:'Hiện bạn sống ở đâu?',opts:['TP.HCM','Hà Nội','Đà Nẵng','Tỉnh, thành khác ở Việt Nam','Ngoài Việt Nam']},
+ {id:'q5',sec:2,type:'single',text:'Công việc hiện tại của bạn?',opts:['Học sinh','Sinh viên','Đi làm dưới 2 năm','Đi làm từ 2 năm trở lên','Freelancer',{v:'Khác',other:true}]},
+ {id:'q6',sec:2,type:'single',text:'Mỗi tháng bạn chi khoảng bao nhiêu cho giải trí (game, phim, đi chơi)?',opts:['Dưới 500.000 VND','500.000–1.000.000 VND','1.000.001–2.000.000 VND','2.000.001–5.000.000 VND','Trên 5.000.000 VND']},
+
+ {id:'q7',sec:3,type:'single',text:'Bạn chơi game (trên bất kỳ thiết bị nào) thường xuyên đến mức nào?',opts:['Gần như mỗi ngày','Vài lần mỗi tuần','Vài lần mỗi tháng','Ít hơn một lần mỗi tháng']},
+ {id:'q8',sec:3,type:'multi',text:'Bạn có những thiết bị nào dùng được để chơi game?',opts:['PC để bàn','Laptop','Điện thoại','Máy console','Máy tính bảng']},
+ {id:'q9',sec:3,type:'multi',text:'Bạn thường chơi game trên thiết bị nào?',opts:['PC (máy bàn)','Laptop','Điện thoại, máy tính bảng','Console (PlayStation, Xbox, Switch)']},
+ {id:'q10',sec:3,type:'single',text:'Máy tính bạn đang dùng chơi game 3D (ví dụ Phasmophobia, Valorant, Genshin Impact) như thế nào?',opts:['Chạy mượt','Chạy được nhưng phải giảm đồ họa','Thường giật, lag','Tôi không có máy tính','Tôi không biết']},
+ {id:'q11',sec:3,type:'multi',text:'Bạn hay chơi những thể loại game nào?',opts:['Trinh thám, điều tra','Giải đố','Cốt truyện, nhập vai','Kinh dị','Co-op phối hợp (ví dụ It Takes Two, Phasmophobia)','Social deduction (ví dụ Among Us, Ma Sói)','Bắn súng, MOBA, đối kháng','Mô phỏng, nhẹ nhàng',{v:'Khác',other:true}]},
+ {id:'q12',sec:3,type:'multi',text:'Trong 6 tháng qua, bạn đã tham gia hoạt động nào dưới đây?',opts:['Chơi game trinh thám hoặc giải đố','Chơi phòng thoát hiểm (escape room)','Chơi kịch bản sát, murder mystery nhập vai','Chơi board game suy luận (Ma Sói, Avalon, Cluedo…)','Đọc tiểu thuyết, xem phim hoặc nghe podcast trinh thám',{v:'Không tham gia hoạt động nào',excl:true}]},
+
+ {id:'q13',sec:4,type:'scale',text:'Bạn thích chơi game một mình hay cùng người khác?',ends:['Chỉ một mình','Chỉ cùng người khác']},
+ {id:'q14',sec:4,type:'single',text:'Trong 3 tháng qua, bạn có chơi game cùng người quen (bạn bè, người yêu, đồng nghiệp, người nhà) không?',opts:['Có, chơi online','Có, chơi chung một chỗ','Có, cả hai kiểu','Không']},
+ {id:'q15',sec:4,type:'single',when:playsWithOthers,text:'Bạn có nhóm bạn cố định hay chơi game online cùng không?',opts:['Có, 2–3 người','Có, 4–5 người','Có, từ 6 người','Không có nhóm cố định']},
+ {id:'q16',sec:4,type:'single',when:playsWithOthers,text:'Khi nhóm chơi game cùng nhau, ai thường rủ và chọn game?',opts:['Hầu như là tôi','Tôi và người khác thay phiên','Thường là người khác','Tôi không chơi cùng bạn bè']},
+ {id:'q17',sec:4,type:'single',when:playsWithOthers,text:'Khi chơi game nhiều người, lý do chính của bạn là gì?',opts:['Vì được chơi cùng bạn bè','Vì thích thử thách, giải đố','Vì thích cốt truyện, khám phá','Vì muốn thắng, leo hạng','Để giải trí, giết thời gian','Tôi không chơi game nhiều người']},
+ {id:'q18',sec:4,type:'multi',when:playsWithOthers,text:'Bạn thường chơi game cùng nhóm vào lúc nào?',opts:['Tối ngày thường','Khuya (sau 23h)','Cuối tuần','Ngày lễ, kỳ nghỉ','Không cố định']},
+ {id:'q19',sec:4,type:'multi',when:playsWithOthers,text:'Trong 3 tháng qua, khi muốn chơi game cùng bạn, bạn đã gặp những trở ngại nào?',opts:[...OBST,{v:'Không gặp trở ngại nào',excl:true},{v:'Khác',other:true}]},
+ {id:'q20',sec:4,type:'single',when:A=>playsWithOthers(A)&&obstaclesChosen(A).length>=2,dyn:A=>obstaclesChosen(A),text:'Trong những trở ngại bạn vừa chọn, trở ngại nào lớn nhất?'},
+ {id:'q21',sec:4,type:'single',when:playsWithOthers,text:'Trong 3 tháng qua, bạn đã bao nhiêu lần bỏ ý định chơi một game nhiều người vì không gom đủ người?',opts:['Chưa lần nào','1 lần','2–3 lần','Nhiều hơn 3 lần']},
+ {id:'q22',sec:4,type:'scale',when:playsWithOthers,text:'Bạn đồng ý đến đâu với câu: “Tôi sẵn sàng chơi một thể loại không phải sở thích của mình nếu được chơi cùng nhóm bạn thân.”',ends:AGREE},
+
+ {id:'q23',sec:5,type:'single',text:'Vào buổi tối ngày thường, một phiên chơi game cùng bạn dài tối đa bao lâu thì bạn thấy thoải mái?',opts:['Dưới 30 phút','30–44 phút','45–60 phút','61–90 phút','Trên 90 phút','Tôi không chơi game vào tối ngày thường']},
+ {id:'q24',sec:5,type:'grid',text:'Bạn đồng ý đến đâu với các câu sau?',ends:AGREE,rows:[
+   ['a','Tôi ngại bắt đầu một game khi không biết sẽ mất bao lâu mới xong.'],
+   ['b','Tôi ngại bắt đầu một game khi không lưu được tiến độ để chơi tiếp hôm sau.'],
+   ['c','Phải đọc nhiều hồ sơ hoặc hội thoại dài khiến tôi giảm hứng thú với game.']]},
+
+ {id:'q25',sec:6,type:'grid',text:'Trong các game chơi nhóm (co-op) bạn từng chơi, những tình huống sau xảy ra thường xuyên đến mức nào?',
+   cols:['Không bao giờ','Hiếm khi','Thỉnh thoảng','Thường xuyên','Luôn luôn','Tôi chưa chơi game co-op'],rows:[
+   ['a','Một vài người làm gần hết, những người còn lại chỉ đi theo.'],
+   ['b','Mỗi người tự chơi phần của mình, không ai cần thông tin của ai.'],
+   ['c','Tranh luận trong nhóm biến thành cãi nhau, làm mất vui.'],
+   ['d','Một người mất kết nối khiến cả nhóm phải dừng lại.']]},
+ {id:'q26',sec:6,type:'grid',text:'Khi chọn một game trinh thám hoặc giải đố, những yếu tố sau quan trọng với bạn đến mức nào?',ends:['Không quan trọng','Rất quan trọng'],rows:[
+   ['a','Cốt truyện logic, chứng cứ khớp với nhau'],
+   ['b','Độ khó công bằng, không phải đoán mò'],
+   ['c','Có tình tiết bất ngờ, đảo ngược'],
+   ['d','Mỗi người có vai trò và thông tin riêng'],
+   ['e','Có yếu tố hài hước, đối đáp dí dỏm']]},
+ {id:'q27',sec:6,type:'scale',text:'Bạn đồng ý đến đâu với câu: “Ở cuối một game trinh thám, tôi muốn phải chỉ ra chứng cứ để chứng minh kết luận của mình, chứ không chỉ chọn một đáp án đúng hoặc sai.”',ends:AGREE},
+ {id:'q28',sec:6,type:'multi',text:'Bạn đã từng bỏ dở một game điều tra hoặc giải đố vì lý do nào?',opts:['Không hiểu cách liên kết các manh mối','Bị tụt lại, không theo kịp nhóm','Bị kẹt quá lâu mà không có đầu mối nào','Phải đọc quá nhiều chữ','Tình tiết lặp lại, nhàm chán','Không đủ thời gian chơi hết','Bạn bè bỏ nên tôi bỏ theo',{v:'Tôi chưa từng bỏ dở game nào loại này',excl:true},{v:'Tôi chưa chơi game điều tra hoặc giải đố',excl:true}]},
+ {id:'q29',sec:6,type:'single',text:'Khi chơi game cùng nhóm, bạn bật mic nói chuyện thường xuyên đến mức nào?',opts:['Luôn luôn','Thường xuyên','Thỉnh thoảng','Hiếm khi','Không bao giờ']},
+ {id:'q30',sec:6,type:'multi',text:'Nếu không dùng mic, bạn muốn trao đổi với đồng đội bằng cách nào?',opts:['Chat chữ trong game','Đánh dấu vị trí, vật thể (ping)','Câu nói hoặc biểu cảm có sẵn','Ghim chứng cứ lên bảng chung','Dùng Discord','Dùng Messenger hoặc các ứng dụng khác',{v:'Tôi luôn dùng mic trong game',excl:true}]},
+
+ {id:'q31',sec:7,type:'multi',text:'Trong 12 tháng qua, bạn đã trả tiền cho những gì?',opts:['Game trên PC hoặc console','Game hoặc vật phẩm trên điện thoại','Game indie','Escape room hoặc quán board game','Bộ hồ sơ phá án',{v:'Chưa trả cho mục nào',excl:true}]},
+ {id:'q32',sec:7,type:'single',text:'Lần gần nhất nhóm bạn cần trả tiền cho một game, một phòng chơi hoặc một gói nội dung để chơi cùng nhau, việc trả tiền diễn ra thế nào?',opts:['Mỗi người tự trả phần của mình','Một người trả trước cho cả nhóm, sau đó chia lại','Một người trả cho cả nhóm, không chia lại','Game miễn phí, không ai phải trả','Chưa từng trả tiền để chơi chung']},
+ {id:'q33',sec:7,type:'multi',max:2,text:'Với một game của studio chưa nổi tiếng, điều gì khiến bạn sẵn sàng trả tiền?',opts:['Có bản chơi thử miễn phí','Đánh giá tốt trên Steam hoặc cộng đồng','Bạn bè đã chơi và giới thiệu','Giá thấp','Streamer hoặc TikToker tôi theo dõi đã chơi','Được hoàn tiền nếu không thích',{v:'Tôi không trả tiền cho game của studio chưa nổi tiếng',excl:true}]},
+ {id:'q34',sec:7,type:'grid',text:'Bạn đồng ý đến đâu với các câu sau?',ends:AGREE,rows:[
+   ['a','Nếu phải trả thêm tiền để mở một số chứng cứ, tôi sẽ bớt muốn mua game đó.'],
+   ['b','Nếu phải mua gợi ý khi bị kẹt giữa chừng, tôi sẽ bớt muốn mua game đó.'],
+   ['c','Nếu game có nạp coin (tiền ảo trong game, ví dụ Quân Huy của Liên Quân, Robux của Roblox), tôi sẽ bớt muốn mua game đó.'],
+   ['d','Tôi muốn một người mua là cả nhóm chơi được, thay vì ai cũng phải mua.']]},
+ {id:'q35',sec:7,type:'single',text:'Với một game phá án chơi nhóm, bạn thích cách trả nào nhất?',opts:['Một người mua, cả nhóm chơi','Mỗi người mua bản của mình','Mua từng vụ án riêng lẻ','Mua gói nhiều vụ án giá thấp hơn','Mua một lần toàn bộ game','Miễn phí, trả cho nội dung thêm']},
+ {id:'q36',sec:7,type:'grid',text:'Bạn sẵn sàng trả tiền đến mức nào trong từng trường hợp sau?',ends:['Chắc chắn không trả','Chắc chắn trả'],rows:[
+   ['a','Trả tiền để chơi một vụ án mới, sau khi đã thích vụ án đầu tiên'],
+   ['b','Trả tiền để chơi lại vụ án cũ với một kết thúc khác']]},
+
+ {id:'q37',sec:8,type:'single',text:'Khi xem trailer của một game chơi nhóm, điều gì khiến bạn muốn thử nhất?',opts:['Cảnh cả nhóm phối hợp với nhau','Cốt truyện, bí ẩn của vụ án','Đồ họa, không khí','Nhân vật','Khoảnh khắc hài hước hoặc bất ngờ']},
+ {id:'q38',sec:8,type:'scale',text:'Bạn đồng ý đến đâu với câu: “Tôi ngại tìm hiểu trước về một game trinh thám vì sợ bị tiết lộ nội dung.”',ends:AGREE},
+ {id:'q39',sec:8,type:'multi',max:2,text:'Bạn thường biết đến game mới qua kênh nào?',opts:['Bạn bè rủ hoặc giới thiệu','TikTok','YouTube','Facebook, nhóm cộng đồng game','Steam (gợi ý, trang chủ, sale)','Streamer trên Twitch hoặc Facebook Gaming','Discord',{v:'Khác',other:true}]},
+ {id:'q40',sec:8,type:'grid',text:'Bạn đồng ý đến đâu với các câu sau?',ends:AGREE,rows:[
+   ['a','Tôi hay thử một game mới khi bạn bè rủ.'],
+   ['b','Tôi xem review hoặc gameplay trước khi tải hoặc mua.'],
+   ['c','Dù được bạn bè rủ, tôi vẫn cần chơi thử miễn phí trước khi bỏ tiền.']]},
+
+ {id:'concept',sec:9,type:'concept'},
+ {id:'q41',sec:9,type:'numbers',text:'Với một vụ án như trên, một người mua cho cả phòng tối đa 4 người, mức giá nào là…',fields:[
+   ['a','…rẻ đến mức bạn nghi ngờ chất lượng?'],
+   ['b','…rẻ, đáng tiền?'],
+   ['c','…bắt đầu thấy đắt nhưng vẫn cân nhắc?'],
+   ['d','…quá đắt, chắc chắn không mua?']]},
+ {id:'q42',sec:9,type:'scale',text:'Sau khi xem giới thiệu, bạn muốn chơi thử Casery cùng bạn bè đến mức nào?',ends:['Hoàn toàn không muốn','Rất muốn']},
+ {id:'q43',sec:9,type:'text',long:true,optional:true,text:'Điều gì khiến bạn muốn hoặc ngại thử Casery?'},
+ {id:'q44',sec:9,type:'text',optional:true,contact:true,text:'Nếu muốn nhận lời mời chơi thử, hãy để lại email hoặc Discord.'}
+];
+const BY = Object.fromEntries(Q.map(q=>[q.id,q]));
+const TOTAL_Q = Q.filter(q=>q.type!=='concept').length;
+
+/* ====== TRẠNG THÁI ====== */
+const KEY='casery_survey_'+CONFIG.version;
+let S = {answers:{}, cur:'intro', started:null, rid:null, priceWarned:false};
+const store = {
+  get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+  del(k){try{localStorage.removeItem(k)}catch(e){}}
+};
+const save=()=>store.set(KEY,S);
+const A=()=>S.answers;
+const uid=()=> (crypto.randomUUID ? crypto.randomUUID() : 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,10));
+const optVal=o=>typeof o==='string'?o:o.v;
+const optsOf=q=>q.dyn?q.dyn(A()):q.opts;
+const isVisible=q=>!q.when||q.when(A());
+
+function stepList(){
+  const out=[]; let sec=0;
+  for(const q of Q){
+    if(!isVisible(q)) continue;
+    if(q.sec!==sec){ sec=q.sec; if(sec>1) out.push('ch'+sec); }
+    out.push(q.id);
+  }
+  return out;
+}
+function secOf(key){ if(key.startsWith('ch')) return +key.slice(2); return BY[key]?BY[key].sec:0; }
+
+function isAnswered(q){
+  const v=A()[q.id];
+  switch(q.type){
+    case 'single': return !!v;
+    case 'multi': return Array.isArray(v)&&v.length>0;
+    case 'scale': return typeof v==='number';
+    case 'grid': return q.rows.every(r=>v&&v[r[0]]!=null);
+    case 'numbers': return q.fields.every(f=>v&&+v[f[0]]>0);
+    case 'text': return q.optional || !!(v&&v.trim());
+    case 'concept': return true;
+  }
+  return false;
+}
+
+/* ====== GIAO DIỆN ====== */
+const app=document.getElementById('app');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CLIP='<svg class="clip" viewBox="0 0 22 54" aria-hidden="true"><path d="M7 40V9a4 4 0 0 1 8 0v34a6 6 0 0 1-12 0V12" fill="none" stroke="#8a8f94" stroke-width="2.4" stroke-linecap="round"/></svg>';
+let dir='enter';
+
+function setTop(){
+  const top=document.getElementById('top');
+  const k=S.cur;
+  const inSurvey = k!=='intro' && !k.startsWith('end');
+  top.hidden=!inSurvey && !(k==='end-done');
+  const track=document.getElementById('track');
+  const sec = k==='end-done'?10:secOf(k);
+  track.querySelectorAll('.dot').forEach(d=>d.remove());
+  for(let i=1;i<=9;i++){
+    const d=document.createElement('div'); d.className='dot'+(i<sec?' done':'')+(i===sec?' cur':''); d.textContent=i<sec?'✓':i; track.appendChild(d);
+  }
+  document.getElementById('fill').style.width = (Math.min(sec-1,8)/8*100)+'%';
+  const list=stepList();
+  const idx=list.indexOf(k);
+  const pct = k==='end-done'?100: Math.round(Math.max(0,idx)/list.length*100);
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('chapname').textContent = sec>=1&&sec<=9 ? 'Chương '+sec+' · '+CHAPTERS[sec].t : '';
+}
+
+function render(){
+  setTop();
+  const k=S.cur;
+  if(k==='intro') return renderIntro();
+  if(k.startsWith('end-')) return renderEnd(k.slice(4));
+  if(k.startsWith('ch')) return renderChapter(+k.slice(2));
+  const q=BY[k];
+  if(q.type==='concept') return renderConcept(q);
+  renderQuestion(q);
+}
+
+function shell(inner, cls=''){
+  app.innerHTML=`<section class="card ${cls} ${dir}">${CLIP}${inner}</section>`;
+  dir='enter';
+  window.scrollTo({top:0,behavior:'instant'in window?'instant':'auto'});
+}
+
+function renderIntro(){
+  const saved=store.get(KEY);
+  const done=store.get(KEY+'_done');
+  const resume = saved && saved.cur && saved.cur!=='intro' && !saved.cur.startsWith('end');
+  shell(`
+    <div class="tab">Hồ sơ #001</div>
+    <div class="cover">
+      <div class="file">Khảo sát người chơi game</div>
+      <h1>Bạn chơi game cùng bạn bè như thế nào?</h1>
+      <p>Xin chào, chúng mình là nhóm sinh viên UEH đang thực hiện đồ án môn học về trải nghiệm chơi game cùng bạn bè.</p>
+      <p>Không có câu trả lời đúng hay sai, bạn hãy chọn theo trải nghiệm thật của mình. Câu trả lời được ghi nhận ẩn danh và chỉ dùng cho mục đích học tập.</p>
+      <div class="meta"><span>9 chương</span><span>Khoảng 12–15 phút</span><span>Ẩn danh</span></div>
+      ${done?'<p class="small">Bạn đã gửi khảo sát này trên thiết bị này. Cảm ơn bạn.</p>':''}
+      <div class="nav" style="justify-content:${resume?'space-between':'flex-end'}">
+        ${resume?'<button class="back" id="restart">Làm lại từ đầu</button>':''}
+        <button class="next" id="go">${resume?'Tiếp tục hồ sơ':'Mở hồ sơ'}</button>
+      </div>
+    </div>`,'');
+  document.getElementById('go').onclick=()=>{
+    if(resume){ S=saved; } else { S={answers:{},cur:'q1',started:null,rid:uid(),priceWarned:false}; }
+    save(); render();
+  };
+  const r=document.getElementById('restart');
+  if(r) r.onclick=()=>{ store.del(KEY); S={answers:{},cur:'q1',started:null,rid:uid(),priceWarned:false}; save(); render(); };
+}
+
+function renderChapter(n){
+  const c=CHAPTERS[n];
+  shell(`
+    <div class="chapter">
+      <div class="n">Chương ${n} / 9</div>
+      <h2>${esc(c.t)}</h2>
+      <p>${esc(c.d)}</p>
+      <div class="nav"><button class="next" id="nx">Bắt đầu chương</button><button class="back" id="bk">Quay lại</button></div>
+    </div>`);
+  document.getElementById('nx').onclick=next;
+  document.getElementById('bk').onclick=back;
+}
+
+function renderConcept(q){
+  const video = CONFIG.trailerUrl ? `<div class="video"><iframe src="${esc(CONFIG.trailerUrl)}" title="Trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : '';
+  shell(`
+    <div class="tab">Giới thiệu</div>
+    <div class="qnum">Đọc trước khi trả lời</div>
+    ${video}
+    <div class="concept">
+      <h3>Casery</h3>
+      <p>Một bản thiết kế chip AI tối mật vừa bị rò rỉ. Nghi phạm duy nhất là người yêu của CEO. Hội đồng không muốn đoán mò, nên họ thuê các bạn.</p>
+      <p>Chơi co-op online. Mỗi người giữ một chuyên môn: lý lịch, nhân chứng hoặc hồ sơ doanh nghiệp. Cả nhóm bay tới quê nghi phạm, lục căn hộ của cô ấy, nín thở trốn khi cô ấy về sớm, rồi dựng lại dòng thời gian trên bảng chung.</p>
+      <p>Cuối vụ án, cả nhóm bỏ phiếu SPY hay NOT SPY. Mỗi lần chơi, sự thật có thể khác. Gia đình tử tế không có nghĩa là vô tội. Một quá khứ khó nói cũng không có nghĩa là có tội.</p>
+    </div>
+    <div class="nav"><button class="back" id="bk">Quay lại</button><button class="next" id="nx">Tôi đã đọc xong</button></div>`);
+  document.getElementById('nx').onclick=next;
+  document.getElementById('bk').onclick=back;
+}
+
+function hintFor(q){
+  if(q.type==='single') return 'Chọn một';
+  if(q.type==='multi') return q.max?`Chọn tối đa ${q.max}`:'Chọn tất cả lựa chọn phù hợp';
+  if(q.type==='scale') return 'Chọn một mức từ 1 đến 5';
+  if(q.type==='grid') return q.cols?'Chọn một mức cho mỗi câu':'Chọn một mức từ 1 đến 5 cho mỗi câu';
+  if(q.type==='numbers') return 'Nhập số, đơn vị nghìn đồng. Ví dụ nhập 50 nghĩa là 50.000 VND.';
+  if(q.type==='text') return q.optional?'Không bắt buộc':'';
+  return '';
+}
+
+function renderQuestion(q){
+  const n=q.id.slice(1);
+  const a=A();
+  let body='';
+  if(q.type==='single'||q.type==='multi'){
+    const multi=q.type==='multi';
+    const opts=optsOf(q);
+    body='<div class="opts">'+opts.map((o,i)=>{
+      const v=optVal(o);
+      const sel = multi ? (a[q.id]||[]).includes(v) : a[q.id]===v;
+      const key = String.fromCharCode(65+i);
+      let html=`<button class="opt ${multi?'multi':''} ${sel?'sel':''}" data-i="${i}" aria-pressed="${sel}"><span class="k">${sel&&multi?'✓':key}</span><span class="lbl">${esc(v)}</span></button>`;
+      if(o.other&&sel) html+=`<div class="other"><input class="txt" data-other="${q.id}" placeholder="Ghi rõ (không bắt buộc)" value="${esc(a[q.id+'_khac']||'')}"></div>`;
+      return html;
+    }).join('')+'</div>';
+  } else if(q.type==='scale'){
+    body=`<div class="scale">${[1,2,3,4,5].map(v=>`<button class="sbtn ${a[q.id]===v?'sel':''}" data-v="${v}">${v}</button>`).join('')}</div>
+      <div class="ends"><span>1 = ${esc(q.ends[0])}</span><span>5 = ${esc(q.ends[1])}</span></div>`;
+  } else if(q.type==='grid'){
+    const g=a[q.id]||{};
+    const legend = q.cols?'':`<div class="glegend">1 = ${esc(q.ends[0])} · 5 = ${esc(q.ends[1])}</div>`;
+    body=legend+'<div>'+q.rows.map(([rid,txt])=>{
+      const cur=g[rid];
+      const btns = q.cols
+        ? `<div class="chips">${q.cols.map((c,ci)=>`<button class="chip ${cur===c?'sel':''}" data-r="${rid}" data-c="${ci}">${esc(c)}</button>`).join('')}</div>`
+        : `<div class="scale">${[1,2,3,4,5].map(v=>`<button class="sbtn ${cur===v?'sel':''}" data-r="${rid}" data-v="${v}">${v}</button>`).join('')}</div>`;
+      return `<div class="grow" id="row-${rid}"><div class="gtext"><b>${rid}.</b>${esc(txt)}</div>${btns}</div>`;
+    }).join('')+'</div>';
+  } else if(q.type==='numbers'){
+    const v=a[q.id]||{};
+    body='<div class="nums">'+q.fields.map(([fid,txt])=>`
+      <div class="nrow"><label for="n-${fid}"><b>${fid}.</b>${esc(txt)}</label>
+      <div class="nwrap"><input class="txt" id="n-${fid}" data-f="${fid}" inputmode="numeric" autocomplete="off" value="${esc(v[fid]||'')}"><span class="unit">nghìn đồng</span><span class="vnd" id="vnd-${fid}"></span></div></div>`).join('')+'</div><div class="warn" id="pwarn" hidden></div>';
+  } else if(q.type==='text'){
+    body = q.long
+      ? `<textarea class="txt" id="t" placeholder="Viết vài dòng nếu bạn muốn">${esc(a[q.id]||'')}</textarea>`
+      : `<input class="txt" id="t" placeholder="${q.contact?'Email hoặc tên Discord':''}" value="${esc(a[q.id]||'')}">`;
+    if(q.contact) body+='<p class="small" style="margin-top:8px">Thông tin này được lưu tách riêng khỏi câu trả lời khảo sát.</p>';
+  }
+  const isLast = stepList().slice(-1)[0]===q.id;
+  const kbd = (q.type==='single'||q.type==='multi') ? 'Nhấn A, B, C… để chọn · Enter để tiếp' : (q.type==='scale'?'Nhấn 1–5 để chọn · Enter để tiếp':'Enter để tiếp');
+  shell(`
+    <div class="tab">Chương ${q.sec}</div>
+    <div class="qnum">Câu ${n}</div>
+    <h2 class="qtext">${esc(q.text)}</h2>
+    <div class="qhint" id="hint">${hintFor(q)}</div>
+    ${body}
+    <div class="nav">
+      <button class="back" id="bk" ${q.id==='q1'?'hidden':''}>Quay lại</button>
+      <button class="next" id="nx">${isLast?'Gửi hồ sơ':'Tiếp'}</button>
+    </div>
+    <div class="kbd">${kbd}</div>`);
+  wire(q);
+}
+
+function refreshNext(q){ const b=document.getElementById('nx'); if(b) b.disabled=!isAnswered(q); }
+let autoTimer=null;
+function wire(q){
+  const a=A();
+  document.getElementById('bk').onclick=back;
+  document.getElementById('nx').onclick=next;
+  refreshNext(q);
+  if(q.type==='single'||q.type==='multi'){
+    app.querySelectorAll('.opt').forEach(btn=>btn.onclick=()=>pick(q,+btn.dataset.i));
+    app.querySelectorAll('[data-other]').forEach(inp=>inp.oninput=e=>{a[q.id+'_khac']=e.target.value; save();});
+  }
+  if(q.type==='scale') app.querySelectorAll('.sbtn').forEach(b=>b.onclick=()=>{a[q.id]=+b.dataset.v; save(); renderSel(q); autoNext(q);});
+  if(q.type==='grid'){
+    app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{
+      const g=a[q.id]=a[q.id]||{};
+      g[b.dataset.r] = q.cols ? q.cols[+b.dataset.c] : +b.dataset.v;
+      save();
+      const row=document.getElementById('row-'+b.dataset.r);
+      row.querySelectorAll('[data-r]').forEach(x=>x.classList.toggle('sel', x===b));
+      refreshNext(q);
+      const nextRow = q.rows.find(r=>g[r[0]]==null);
+      if(nextRow){ const el=document.getElementById('row-'+nextRow[0]); const r=el.getBoundingClientRect(); if(r.top>window.innerHeight*0.6) el.scrollIntoView({behavior:'smooth',block:'center'}); }
+      else autoNext(q);
+    });
+  }
+  if(q.type==='numbers'){
+    const fmt=()=>{ q.fields.forEach(([f])=>{ const v=(a[q.id]||{})[f]; document.getElementById('vnd-'+f).textContent = v>0 ? '= '+(+v*1000).toLocaleString('vi-VN')+' VND' : ''; }); };
+    app.querySelectorAll('[data-f]').forEach(inp=>inp.oninput=e=>{
+      const clean=e.target.value.replace(/\D/g,'').slice(0,6); e.target.value=clean;
+      a[q.id]=a[q.id]||{}; a[q.id][e.target.dataset.f]=clean; save(); fmt(); refreshNext(q);
+      document.getElementById('pwarn').hidden=true; S.priceWarned=false;
+    });
+    fmt();
+  }
+  if(q.type==='text'){
+    const t=document.getElementById('t'); t.oninput=e=>{a[q.id]=e.target.value; save(); refreshNext(q);};
+  }
+}
+function renderSel(q){
+  if(q.type==='scale') app.querySelectorAll('.sbtn').forEach(b=>b.classList.toggle('sel',+b.dataset.v===A()[q.id]));
+  refreshNext(q);
+}
+function autoNext(q){ clearTimeout(autoTimer); autoTimer=setTimeout(()=>{ if(S.cur===q.id&&isAnswered(q)) next(); },320); }
+
+function pick(q,i){
+  const a=A(); const opts=optsOf(q); const o=opts[i]; const v=optVal(o);
+  if(q.type==='single'){
+    a[q.id]=v; if(!o.other) delete a[q.id+'_khac'];
+    save(); renderQuestion(q); app.firstElementChild.classList.remove('enter');
+    if(!o.other) autoNext(q); else { const inp=app.querySelector('[data-other]'); if(inp) inp.focus(); }
+    return;
+  }
+  let arr=a[q.id]||[];
+  if(arr.includes(v)) arr=arr.filter(x=>x!==v);
+  else {
+    if(o.excl) arr=[v];
+    else {
+      arr=arr.filter(x=>{ const oo=opts.find(p=>optVal(p)===x); return !(oo&&oo.excl); });
+      if(q.max&&arr.length>=q.max){ const h=document.getElementById('hint'); h.textContent=`Bạn chỉ chọn được tối đa ${q.max}. Bỏ một lựa chọn trước khi chọn thêm.`; h.classList.add('flash'); return; }
+      arr=[...arr,v];
+    }
+  }
+  a[q.id]=arr; if(!arr.includes('Khác')) delete a[q.id+'_khac'];
+  // giữ câu trả lời Q20 hợp lệ khi Q19 thay đổi
+  if(q.id==='q19' && a.q20 && !obstaclesChosen(a).includes(a.q20)) delete a.q20;
+  save(); renderQuestion(q); app.firstElementChild.classList.remove('enter');
+  if(o.other&&arr.includes(v)){ const inp=app.querySelector('[data-other]'); if(inp) inp.focus(); }
+}
+
+/* ====== ĐIỀU HƯỚNG ====== */
+function next(){
+  const k=S.cur;
+  const q=BY[k];
+  if(q){
+    if(!isAnswered(q)) return;
+    if(q.id==='q1'&&A().q1==='Đồng ý'&&!S.started) S.started=new Date().toISOString();
+    const opt = (q.type==='single') ? (optsOf(q).find(o=>optVal(o)===A()[q.id])) : null;
+    if(opt&&opt.end){
+      if(opt.end==='declined'){ S.cur='end-declined'; save(); return render(); }
+      if(opt.end==='screened'){ return submit('loai_sang_loc'); }
+    }
+    if(q.type==='numbers' && !S.priceWarned){
+      const v=A()[q.id]; const xs=['a','b','c','d'].map(f=>+v[f]);
+      const ok = xs.every((x,i)=>i===0||x>=xs[i-1]);
+      if(!ok){ S.priceWarned=true; const w=document.getElementById('pwarn'); w.hidden=false; w.textContent='Các mức giá thường tăng dần từ a đến d. Bạn kiểm tra lại giúp nhóm; nếu đúng ý bạn, bấm Tiếp lần nữa.'; return; }
+    }
+  }
+  const list=stepList(); const i=list.indexOf(k);
+  if(i===list.length-1) return submit('hoan_thanh');
+  S.cur=list[i+1]; dir='enter'; save(); render();
+}
+function back(){
+  const list=stepList(); const i=list.indexOf(S.cur);
+  if(i>0){ S.cur=list[i-1]; dir='enter-back'; save(); render(); }
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('input,textarea')){ if(e.key==='Enter'&&e.target.tagName==='INPUT'){ e.preventDefault(); const b=document.getElementById('nx'); if(b&&!b.disabled) b.click(); } return; }
+  const q=BY[S.cur];
+  if(e.key==='Enter'){ const b=document.getElementById('nx')||document.getElementById('go'); if(b&&!b.disabled){ e.preventDefault(); b.click(); } return; }
+  if(!q) return;
+  if((q.type==='single'||q.type==='multi')&&/^[a-z]$/i.test(e.key)){ const i=e.key.toUpperCase().charCodeAt(0)-65; if(i<optsOf(q).length){ e.preventDefault(); pick(q,i);} }
+  if(q.type==='scale'&&/^[1-5]$/.test(e.key)){ A()[q.id]=+e.key; save(); renderSel(q); autoNext(q); }
+});
+
+/* ====== GỬI DỮ LIỆU ====== */
+function flatten(status){
+  const a=A(); const now=new Date();
+  const p={
+    response_id:S.rid||uid(), trang_thai:status, phien_ban:CONFIG.version,
+    bat_dau:S.started||'', nop_luc:now.toISOString(),
+    thoi_gian_giay: S.started? Math.round((now-new Date(S.started))/1000):'',
+    thiet_bi: (matchMedia('(pointer:coarse)').matches||/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent))?'mobile':'desktop', rong_man_hinh: window.innerWidth
+  };
+  for(const q of Q){
+    if(q.type==='concept') continue;
+    const v=a[q.id]; const vis=isVisible(q);
+    if(q.type==='grid'){ q.rows.forEach(([r])=>p[q.id+r]= vis&&v&&v[r]!=null ? v[r] : ''); continue; }
+    if(q.type==='numbers'){ q.fields.forEach(([f])=>p[q.id+f]= vis&&v&&v[f] ? +v[f] : ''); p.q41_tang_dan = vis&&v ? (['a','b','c','d'].every((f,i,arr)=>i===0||+v[f]>=+v[arr[i-1]])?1:0) : ''; continue; }
+    if(q.contact){ continue; }
+    let out = !vis||v==null ? '' : Array.isArray(v) ? v.join('; ') : v;
+    // Q20: nếu chỉ chọn đúng một trở ngại thì đó là trở ngại lớn nhất
+    if(q.id==='q20' && !out && playsWithOthers(a) && obstaclesChosen(a).length===1) out = obstaclesChosen(a)[0];
+    p[q.id]=out;
+    if(q.opts && q.opts.some(o=>o.other)) p[q.id+'_khac'] = vis ? (a[q.id+'_khac']||'') : '';
+  }
+  p.lien_he = (a.q44||'').trim();
+  return p;
+}
+
+async function post(payload){
+  const body=JSON.stringify(payload);
+  try{
+    const r=await fetch(CONFIG.endpoint,{method:'POST',body,redirect:'follow'});
+    const j=await r.json();
+    if(j&&j.ok) return true;
+    throw new Error(j&&j.error||'Phản hồi không hợp lệ');
+  }catch(e){
+    // Một số trình duyệt chặn đọc phản hồi từ Apps Script: gửi lại ở chế độ no-cors. Máy chủ bỏ qua bản trùng response_id.
+    await fetch(CONFIG.endpoint,{method:'POST',mode:'no-cors',body});
+    return true;
+  }
+}
+
+async function submit(status){
+  const payload=flatten(status);
+  S.cur='end-sending'; save(); render();
+  if(!CONFIG.endpoint){
+    console.log('[Xem trước] Dữ liệu sẽ gửi:', payload);
+    window.__lastPayload=payload;
+    return finish(status);
+  }
+  store.set(KEY+'_pending',payload);
+  try{ await post(payload); store.del(KEY+'_pending'); finish(status); }
+  catch(e){ S.cur='end-error'; save(); render(); }
+}
+function finish(status){
+  if(status==='hoan_thanh'){ store.set(KEY+'_done',true); S.cur='end-done'; }
+  else S.cur='end-screened';
+  const keepAnswers=S.answers; save(); store.del(KEY); S.answers=keepAnswers; render();
+}
+async function flushPending(){
+  const p=store.get(KEY+'_pending');
+  if(p&&CONFIG.endpoint){ try{ await post(p); store.del(KEY+'_pending'); }catch(e){} }
+}
+
+/* ====== MÀN KẾT THÚC ====== */
+function profile(a){
+  const myst = (a.q12||[]).filter(x=>x!=='Không tham gia hoạt động nào'&&x!=='Đọc tiểu thuyết, xem phim hoặc nghe podcast trinh thám').length;
+  if(a.q16==='Hầu như là tôi') return ['Người khởi xướng','Bạn thường là người rủ cả nhóm và chọn game.'];
+  if(myst>=2) return ['Người mê bí ẩn','Bạn tìm đến các trò suy luận cả trên màn hình lẫn ngoài đời.'];
+  if(a.q17==='Vì được chơi cùng bạn bè') return ['Người chơi vì bạn bè','Với bạn, chơi cùng ai quan trọng hơn chơi game gì.'];
+  if(a.q17==='Vì thích thử thách, giải đố') return ['Người thích thử thách','Bạn chơi để giải được bài khó.'];
+  if(a.q17==='Vì thích cốt truyện, khám phá') return ['Người đi tìm câu chuyện','Bạn chơi để biết chuyện gì xảy ra tiếp theo.'];
+  return ['Người chơi tự do','Bạn chơi theo cách của mình, không theo khuôn nào.'];
+}
+function renderEnd(kind){
+  if(kind==='sending'){ shell('<div class="end"><div class="spinner"></div><h2>Đang gửi hồ sơ…</h2><p>Bạn giữ trang này mở trong vài giây.</p></div>'); return; }
+  if(kind==='error'){
+    shell(`<div class="end"><div class="stamp">Chưa gửi được</div><h2>Kết nối bị gián đoạn</h2><p>Câu trả lời của bạn vẫn được giữ trên thiết bị này. Bạn kiểm tra mạng rồi thử lại.</p><div class="share"><button class="next" id="retry">Gửi lại</button></div></div>`);
+    document.getElementById('retry').onclick=async()=>{ const p=store.get(KEY+'_pending'); S.cur='end-sending'; render(); try{ await post(p); store.del(KEY+'_pending'); finish(p.trang_thai);}catch(e){ S.cur='end-error'; render(); } };
+    return;
+  }
+  if(kind==='declined'){ shell('<div class="end"><h2>Cảm ơn bạn</h2><p>Bạn đã chọn không tham gia. Không có câu trả lời nào được lưu.</p><div class="share"><button class="ghost" id="again">Quay lại trang đầu</button></div></div>'); document.getElementById('again').onclick=()=>{store.del(KEY); S={answers:{},cur:'intro'}; render();}; return; }
+  if(kind==='screened'){ shell('<div class="end"><div class="stamp">Cảm ơn</div><h2>Khảo sát dành cho người chơi game</h2><p>Lần này nhóm cần ý kiến của người đã chơi game trong 3 tháng gần đây. Cảm ơn bạn đã dành thời gian.</p></div>'); return; }
+  const a=A(); const [role,desc]=profile(a);
+  const facts=[];
+  if(a.q18&&a.q18.length) facts.push(['Giờ chơi nhóm',a.q18.slice(0,2).join(', ')]);
+  if(a.q11&&a.q11.length) facts.push(['Thể loại',a.q11.filter(x=>x!=='Khác').slice(0,2).map(x=>x.split(' (')[0]).join(', ')||'Khác']);
+  if(a.q15) facts.push(['Nhóm chơi',a.q15.replace('Có, ','')]);
+  if(a.q23) facts.push(['Buổi tối ngày thường',a.q23]);
+  shell(`
+    <div class="end">
+      <div class="stamp">Đã ghi nhận</div>
+      <h2>Cảm ơn bạn đã hoàn thành hồ sơ</h2>
+      <p>Câu trả lời của bạn giúp nhóm hiểu người chơi thật sự cần gì khi chơi cùng bạn bè.</p>
+      <div class="idcard"><div class="hd"><span>Thẻ người chơi</span><span>#${(S.rid||'000000').slice(0,6).toUpperCase()}</span></div>
+        <div class="bd"><div class="role">${esc(role)}</div><div class="desc">${esc(desc)}</div>
+        ${facts.length?'<dl>'+facts.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')+'</dl>':''}</div></div>
+      <div class="share"><button class="ghost" id="copy">Sao chép link khảo sát để gửi bạn bè</button><span class="small" id="copied"></span></div>
+    </div>`);
+  document.getElementById('copy').onclick=async()=>{
+    const el=document.getElementById('copied');
+    try{ await navigator.clipboard.writeText(location.href.split('#')[0]); el.textContent='Đã sao chép.'; }
+    catch(e){ el.textContent=location.href.split('#')[0]; }
+  };
+}
+
+/* ====== KHỞI ĐỘNG ====== */
+document.getElementById('preview').hidden=!!CONFIG.endpoint;
+flushPending();
+render();
+</script>
+</body>
+</html>
