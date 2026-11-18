@@ -35,7 +35,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .sndtxt{display:inline-flex;align-items:center;gap:6px;margin-left:auto;background:none;border:none;padding:0;font:600 13px Grandstander,cursive;letter-spacing:.12em;text-transform:uppercase;color:var(--pencil)}
 .sndtxt svg{width:16px;height:16px}
 .sndtxt:hover{color:var(--red)}
-.gate{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:24px;text-align:center;color:var(--cream);cursor:pointer}
+.gate{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:24px;text-align:center;color:var(--cream);cursor:default}
 .gate.out{animation:fadeAway .4s ease forwards;pointer-events:none}
 .gbox{display:flex;flex-direction:column;align-items:center;gap:14px;animation:fadeUp .7s ease backwards}
 .gkick{font:700 13px Grandstander,cursive;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
@@ -1270,7 +1270,9 @@ function setLang(l){
   if(l===LANG) return; LANG=l; try{ localStorage.setItem(LANG_KEY,l); }catch(e){}
   untrNode(document.body);
   // vẽ lại màn hiện tại để trailer, đơn vị... theo ngôn ngữ mới (không làm mất câu trả lời)
-  if(typeof S!=='undefined' && S && S.cur && !['end-sending'].includes(S.cur)) render();
+  // màn chào còn hiện: chỉ dịch chữ trên màn chào, không vẽ trang bên dưới
+  const gateOpen=!!document.querySelector('.gate:not(.out)');
+  if(!gateOpen && typeof S!=='undefined' && S && S.cur && !['end-sending'].includes(S.cur)) render();
   applyLang();
 }
 document.querySelectorAll('#langsw button').forEach(b=>b.onclick=()=>setLang(b.dataset.l));
@@ -1302,7 +1304,7 @@ function startApp(){
   g.innerHTML=`<div class="gbox"><div class="gkick">Hồ sơ #001 · Tuyệt mật</div><div class="gbuddy" aria-hidden="true">${BUDDY_SVG}</div><h2>Có một hồ sơ đang chờ bạn</h2><button class="next pulse" id="gateBtn" type="button">Chạm để mở</button><p>${SPK_ON} Nên bật âm thanh để trải nghiệm trọn vẹn</p></div>`;
   document.body.appendChild(g);
   const open=()=>{ if(g.classList.contains('out')) return; SND.unlock(); SND.play('rustle'); g.classList.add('out'); setTimeout(()=>g.remove(),400); render(); };
-  g.onclick=open;
+  g.querySelector('#gateBtn').onclick=open;   // chỉ mở khi bấm đúng nút, chạm chỗ khác không chuyển bước
   const k=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); removeEventListener('keydown',k); open(); } };
   addEventListener('keydown',k);
 }
