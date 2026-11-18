@@ -485,6 +485,12 @@ const CONFIG = {
   version: 'phase1-v2'
 };
 
+/* ====== LINK KIỂM THỬ ======
+   Mở .../casery-khaosat/?test=1 (hoặc .../casery-khaosat/test/): form chạy y hệt nhưng KHÔNG gửi dữ liệu về Google Sheet,
+   tiến độ lưu riêng (khoá ...-test) để không lẫn với lần làm thật trên cùng máy. */
+const TEST_MODE = new URLSearchParams(location.search).has('test');
+if (TEST_MODE) { CONFIG.endpoint = ''; CONFIG.version += '-test'; }
+
 /* ====== BẢNG HỎI ====== */
 const AGREE = ['Hoàn toàn không đồng ý', 'Hoàn toàn đồng ý'];
 // Nơi sống quyết định đơn vị tiền ở q6, q41: sống ở Việt Nam -> VND, ở nước ngoài -> USD (không phụ thuộc ngôn ngữ hiển thị)
