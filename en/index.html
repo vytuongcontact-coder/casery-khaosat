@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gamer Survey Case File</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cabin:wght@500;700&family=Grandstander:wght@700;900&family=Nunito:wght@500;600;700;800&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{
+  --maroon:#8f1d14; --red:#b3261e; --gold:#C9A55A; --cream:#F3E6CC; --paper:#f3e8d0;
+  --ink:#2a1d16; --quiet:#6b5442; --pencil:#7a604a; --blue:#22346e; --line:#cdb68a;
+  --crumple:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='520'><filter id='c' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='turbulence' baseFrequency='.013' numOctaves='5' seed='11' stitchTiles='stitch'/><feDiffuseLighting lighting-color='%23ffffff' surfaceScale='3.6' diffuseConstant='1.22'><feDistantLight azimuth='230' elevation='58'/></feDiffuseLighting></filter><rect width='100%25' height='100%25' filter='url(%23c)'/></svg>");
+  --grain:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .25  0 0 0 0 .17  0 0 0 0 .1  0 0 0 .6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  --speckle:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='2' seed='5' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -1.7 0 0 0 1.55'/></filter><rect width='100%25' height='100%25' filter='url(%23m)'/></svg>");
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{background:#0d0907}
+body{overflow-x:hidden}
+body{
+  min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; color:var(--ink); font:16px/1.5 Nunito,Arial,sans-serif;
+  background:
+    radial-gradient(ellipse 70% 48% at 50% -6%,rgba(255,205,140,.28),transparent 72%),
+    radial-gradient(ellipse 120% 60% at 50% 112%,rgba(95,22,12,.4),transparent 70%),
+    linear-gradient(180deg,#1c1411,#0e0a08);
+  background-attachment:fixed;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sndbtn{background:none;border:none;padding:0 4px;margin-left:10px;color:var(--gold);vertical-align:-3px;opacity:.85;line-height:0}
+.sndbtn svg{width:17px;height:17px}
+.sndbtn:hover{opacity:1}
+.sndtxt{display:inline-flex;align-items:center;gap:6px;margin-left:auto;background:none;border:none;padding:0;font:600 13px Grandstander,cursive;letter-spacing:.12em;text-transform:uppercase;color:var(--pencil)}
+.sndtxt svg{width:16px;height:16px}
+.sndtxt:hover{color:var(--red)}
+.gate{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:24px;text-align:center;color:var(--cream);cursor:pointer}
+.gate.out{animation:fadeAway .4s ease forwards;pointer-events:none}
+.gbox{display:flex;flex-direction:column;align-items:center;gap:14px;animation:fadeUp .7s ease backwards}
+.gkick{font:700 13px Grandstander,cursive;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.gbuddy{width:110px;height:130px;animation:bob 3s ease-in-out infinite}
+.gbuddy svg{width:100%;height:100%;overflow:visible;filter:url(#rough)}
+.gbuddy .pupil{transform:translate(var(--px,0px),var(--py,0px));transition:transform .15s}
+.gbuddy .eyes{transform-origin:30px 33px;animation:blink2 4.5s infinite}
+.gate h2{margin:0;font:900 30px/1.15 Grandstander,cursive;max-width:320px}
+.gate .next{margin-top:6px;font-size:19px;padding:15px 34px}
+.gate p{display:flex;align-items:center;gap:8px;margin:6px 0 0;font:400 18px 'Patrick Hand',cursive;color:rgba(243,230,204,.7)}
+.gate p svg{width:18px;height:18px}
+.preview{position:relative;z-index:2;background:var(--gold);color:#2B2B2B;text-align:center;font:600 13px Nunito,sans-serif;padding:6px 12px}
+
+/* sân khấu: rèm, đèn, hạt bụi, vân phim */
+.curtain{position:fixed;left:0;right:0;top:0;height:160px;z-index:0;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(90deg,#320604 0,#6e130c 13px,#9a2216 21px,#5e100a 33px,#320604 46px);
+  -webkit-mask-image:linear-gradient(#000,rgba(0,0,0,.55) 45%,transparent);mask-image:linear-gradient(#000,rgba(0,0,0,.55) 45%,transparent)}
+body::before{content:"";position:fixed;inset:-30%;z-index:0;pointer-events:none;background:radial-gradient(circle at 50% 38%,rgba(255,214,150,.13),transparent 32%);animation:sweep 16s ease-in-out infinite alternate}
+@keyframes sweep{0%{transform:translate(-12%,-5%)}50%{transform:translate(7%,4%)}100%{transform:translate(12%,-3%)}}
+body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 40%,transparent 50%,rgba(0,0,0,.6))}
+.grain{position:fixed;inset:-50%;z-index:60;pointer-events:none;background:var(--grain);opacity:.13;animation:grain .5s steps(3) infinite}
+@keyframes grain{0%{transform:translate(0,0)}33%{transform:translate(-3%,2%)}66%{transform:translate(2%,-3%)}100%{transform:translate(0,0)}}
+.fx{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.speck{position:absolute;bottom:-10px;width:3px;height:3px;border-radius:50%;background:rgba(255,220,170,.55);animation:rise linear infinite}
+@keyframes rise{0%{transform:translate(0,0);opacity:0}10%{opacity:.8}85%{opacity:.5}100%{transform:translate(var(--dx,20px),-105vh);opacity:0}}
+.confetti{position:fixed;top:-20px;z-index:50;width:12px;height:15px;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--r))}}
+
+/* đầu trang */
+.top{position:relative;z-index:1;width:100%;max-width:680px;margin:0 auto;padding:18px 18px 6px;color:var(--cream)}
+.brand{display:flex;justify-content:space-between;align-items:baseline;font:600 13px Grandstander,cursive;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.brand .pct{color:var(--cream);letter-spacing:.08em;display:inline-flex;align-items:center}
+.clues{display:inline-flex;align-items:center;gap:5px;color:var(--gold);margin-right:12px}
+.clues svg{width:13px;height:13px}
+.clues.bump{animation:bump .55s cubic-bezier(.3,1.8,.5,1)}
+@keyframes bump{40%{transform:scale(1.35);color:#fff}}
+.track{position:relative;display:flex;justify-content:space-between;align-items:center;margin:14px 6px 6px}
+.track::before{content:"";position:absolute;left:0;right:0;top:50%;height:2px;transform:translateY(-50%);background:repeating-linear-gradient(90deg,rgba(243,230,204,.38) 0 7px,transparent 7px 12px)}
+.track .fill{position:absolute;left:0;top:50%;height:3px;transform:translateY(-50%) rotate(-.4deg);background:var(--red);box-shadow:0 1px 2px rgba(0,0,0,.6);border-radius:2px;transition:width .8s cubic-bezier(.3,1.3,.5,1)}
+.dot{position:relative;z-index:1;width:24px;height:24px;border-radius:50%;border:2px solid rgba(243,230,204,.5);background:#1c1411;display:grid;place-items:center;font:600 11px Grandstander,cursive;color:rgba(243,230,204,.7);transition:all .3s;filter:url(#rough)}
+.dot.cur{border-color:var(--gold);color:var(--gold);transform:scale(1.18)}
+.dot.cur::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--gold);animation:ping 1.8s ease-out infinite}
+@keyframes ping{0%{transform:scale(.7);opacity:.9}100%{transform:scale(1.55);opacity:0}}
+.dot.done{background:var(--red);border-color:var(--red);color:#fff}
+.dot.justdone{animation:pop .6s .3s cubic-bezier(.3,1.8,.5,1) backwards}
+.chapname{font:400 18px 'Patrick Hand',cursive;color:rgba(243,230,204,.85);margin-top:4px;min-height:24px}
+
+/* tờ giấy */
+.stage{position:relative;z-index:1;flex:1;width:100%;max-width:680px;margin:0 auto;padding:22px 14px 40px;display:flex;flex-direction:column;justify-content:flex-start}
+body.centered .stage{justify-content:center}
+#app{position:relative}
+.card{position:relative;isolation:isolate;padding:52px 28px 26px;color:var(--ink);transform:perspective(1400px) rotateX(var(--mx,0deg)) rotateY(var(--my,0deg)) rotate(var(--tilt,0deg));transition:transform .5s ease-out}
+.card::before{content:"";position:absolute;inset:0;z-index:-1;clip-path:var(--edge,none);
+  background:
+    radial-gradient(circle at var(--rx,86%) var(--ry,12%),transparent 27px,rgba(130,85,35,.22) 29px,rgba(130,85,35,.07) 32px,transparent 35px),
+    radial-gradient(ellipse at 12% 88%,rgba(150,100,45,.2),transparent 38%),
+    radial-gradient(ellipse 75% 70% at 50% 45%,transparent 58%,rgba(115,72,30,.34) 100%),
+    var(--grain),
+    var(--crumple),
+    var(--paper);
+  background-size:auto,auto,auto,200px 200px,520px 520px;
+  background-blend-mode:multiply,multiply,multiply,multiply,multiply}
+.card::after{content:"";position:absolute;inset:10px 8px 2px;z-index:-2;border-radius:4px;box-shadow:0 24px 44px rgba(0,0,0,.7),0 5px 12px rgba(0,0,0,.5)}
+.clip{position:absolute;top:-18px;left:24px;width:20px;height:50px;z-index:2;filter:drop-shadow(1px 3px 2px rgba(0,0,0,.35))}
+.pin{position:absolute;top:-12px;left:50%;width:30px;height:30px;margin-left:-15px;z-index:2;filter:drop-shadow(3px 5px 3px rgba(0,0,0,.55))}
+.tab{position:absolute;top:-14px;right:26px;z-index:2;background:rgba(232,220,186,.9);color:var(--ink);font:400 18px/1 'Patrick Hand',cursive;padding:9px 18px 7px;transform:rotate(2.5deg);box-shadow:0 2px 5px rgba(0,0,0,.3);
+  clip-path:polygon(3% 0,97% 0,100% 16%,96% 32%,100% 50%,96% 68%,100% 84%,97% 100%,3% 100%,0 84%,4% 68%,0 50%,4% 32%,0 16%)}
+
+/* chuyển cảnh: thả giấy, kéo giấy, ném giấy */
+.card.enter,.card.enter-back,.card.drop,.card.reveal,.card.leaving{will-change:transform,opacity}
+/* lần đầu mở trang: tờ giấy đặt xuống bàn */
+.card.enter{animation:dropIn .6s cubic-bezier(.2,.8,.3,1.1) backwards}
+.card.enter-back,.card.reveal{animation:reveal .45s ease-out backwards}
+/* poster chương: thả xuống, lắc nhẹ trên đinh ghim */
+.card.drop{transform-origin:50% 0;animation:swing 1s cubic-bezier(.3,.7,.4,1) backwards}
+@keyframes dropIn{0%{opacity:0;transform:translateY(-40px) rotate(4deg) scale(1.04)}60%{opacity:1;transform:translateY(3px) rotate(var(--tilt,0deg))}100%{opacity:1;transform:rotate(var(--tilt,0deg))}}
+@keyframes reveal{from{opacity:0;transform:scale(.985) rotate(var(--tilt,0deg))}to{opacity:1;transform:rotate(var(--tilt,0deg))}}
+@keyframes swing{0%{opacity:0;transform:translateY(-70vh) rotate(-2deg)}35%{opacity:1;transform:translateY(0) rotate(3.5deg)}55%{transform:rotate(-2deg)}72%{transform:rotate(1deg)}86%{transform:rotate(-.4deg)}100%{transform:rotate(var(--tilt,0deg))}}
+/* tờ cũ rời đi */
+.card.leaving{position:fixed;z-index:3;margin:0;pointer-events:none}
+.card.out-up{animation:liftUp .6s cubic-bezier(.5,0,.75,0) forwards}
+.card.out-fade{z-index:-1;animation:fadeAway .35s ease forwards}
+@keyframes liftUp{0%{transform:rotate(var(--tilt,0deg))}20%{transform:translateY(8px) rotate(var(--tilt,0deg))}100%{transform:translateY(-110vh) rotate(-3deg)}}
+@keyframes fadeAway{to{opacity:0;transform:scale(.97)}}
+/* cùng một tờ giấy: chữ mới nice viết lên */
+@keyframes write{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 -2% 0 0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.in{animation:fadeUp .55s ease backwards;animation-delay:var(--d,0s)}
+.card.enter{--d0:.3s}.card.reveal,.card.enter-back{--d0:.15s}.card.swap{--d0:0s}
+.card:is(.enter,.reveal,.enter-back,.swap) :is(.qnum,.qhint){animation:fadeUp .4s ease backwards;animation-delay:var(--d0)}
+.card:is(.enter,.reveal,.enter-back,.swap) .qtext{animation:write .55s cubic-bezier(.4,0,.2,1) backwards;animation-delay:calc(var(--d0) + .05s)}
+.card:is(.enter,.reveal,.enter-back,.swap) .qhint{animation-delay:calc(var(--d0) + .3s)}
+.card:is(.enter,.reveal,.enter-back,.swap) :is(.opt,.grow,.nrow),.card:is(.enter,.reveal,.enter-back,.swap) > :is(.scale,.txt){animation:fadeUp .35s ease backwards;animation-delay:calc(var(--d0) + .32s + var(--i,0)*.045s)}
+
+/* câu hỏi */
+.qnum{display:inline-block;position:relative;font:400 22px/1 'Patrick Hand',cursive;color:var(--red)}
+.qnum::after{content:"";position:absolute;left:-4px;right:-10px;bottom:-6px;height:8px;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'><path d='M2 5C20 2 40 7 60 4S90 3 98 5' fill='none' stroke='%23b3261e' stroke-width='2' stroke-linecap='round'/></svg>") no-repeat;background-size:100% 100%}
+.qtext{font:600 21px/1.4 Nunito,sans-serif;margin:14px 0 4px;color:var(--ink)}
+.qhint{font:400 19px/1.3 'Patrick Hand',cursive;color:var(--pencil);margin-bottom:16px}
+.qhint.flash{color:var(--red);animation:shakeX .4s}
+@keyframes shakeX{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+
+/* nét vẽ tay dùng chung */
+.opt::before,.sbtn::before,.chip::before,.ghost::before{content:"";position:absolute;inset:0;border:1.8px solid rgba(42,29,22,.72);border-radius:8px 5px 9px 4px;filter:url(#rough);pointer-events:none}
+.opt::after,.sbtn::after{content:"";position:absolute;inset:2px -1px -2px 2px;border:1px solid rgba(42,29,22,.22);border-radius:5px 9px 4px 8px;transform:rotate(-.5deg);pointer-events:none}
+.ink{position:absolute;overflow:visible;pointer-events:none;visibility:hidden}
+.sel .ink,.toc .ink{visibility:visible}
+.ink path{fill:none;stroke:var(--red);stroke-width:2.4;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100}
+.sel .ink path{stroke-dashoffset:0}
+.pop .ink path{animation:draw .55s ease-out}
+@keyframes draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+.pop{animation:pop .4s cubic-bezier(.3,1.8,.5,1)!important}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.05) rotate(-.6deg)}100%{transform:scale(1)}}
+
+.opts{display:flex;flex-direction:column;gap:11px}
+.opt{position:relative;display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:rgba(255,251,240,.42);border:none;border-radius:7px;padding:12px 14px;min-height:52px;color:var(--ink);transition:transform .15s,background .15s}
+.opt:hover{transform:translateX(3px) rotate(-.3deg);background:rgba(255,251,240,.7)}
+.opt:active{transform:scale(.985)}
+.opt .k{position:relative;flex:none;width:28px;height:28px;display:grid;place-items:center;font:600 15px Grandstander,cursive;color:var(--pencil)}
+.opt .k::before{content:"";position:absolute;inset:2px;border:1.6px solid rgba(42,29,22,.5);border-radius:50%;filter:url(#rough)}
+.opt.multi .k::before{border-radius:3px}
+.opt.multi .ink{display:none}
+.opt.multi.sel .k::before{border-color:var(--red);border-width:2px;background:rgba(179,38,30,.08)}
+.opt.multi.pop .k{animation:tick .35s cubic-bezier(.3,1.8,.5,1)}
+@keyframes tick{0%{transform:scale(1.7) rotate(-20deg);opacity:0}100%{transform:none;opacity:1}}
+.opt .k .ink{left:-9px;top:-9px;width:calc(100% + 18px);height:calc(100% + 18px)}
+.opt.sel{background:rgba(255,248,228,.82)}
+.opt.sel::before{border-color:var(--red);border-width:2.2px}
+.opt.sel .k{color:var(--red)}
+.opt.sel:not(.multi) .k::before{border-color:transparent}
+.opt .lbl{flex:1}
+.hl{padding:0 2px;background-image:linear-gradient(transparent 50%,rgba(218,170,60,.55) 50%,rgba(218,170,60,.55) 90%,transparent 90%);background-repeat:no-repeat;background-size:0% 100%;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.sel .hl{background-size:100% 100%}
+.pop .hl{animation:swipe .45s .08s ease-out backwards}
+@keyframes swipe{from{background-size:0% 100%}}
+.other{margin:-2px 0 2px 42px}
+input.txt,textarea.txt{width:100%;font:400 21px 'Patrick Hand',cursive;color:var(--blue);border:none;border-bottom:2px dashed rgba(42,29,22,.45);background:transparent;padding:8px 4px;border-radius:0}
+input.txt::placeholder,textarea.txt::placeholder{color:rgba(107,84,66,.6)}
+input.txt:focus,textarea.txt:focus{outline:none;border-bottom-color:var(--red)}
+textarea.txt{min-height:160px;resize:vertical;line-height:32px;padding:0 4px;border-bottom:none;background:repeating-linear-gradient(transparent 0 31px,rgba(50,80,160,.28) 31px 32px)}
+
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.sbtn{position:relative;background:rgba(255,251,240,.42);border:none;border-radius:7px;height:54px;font:600 22px Grandstander,cursive;color:var(--ink);transition:transform .15s}
+.sbtn:hover{transform:rotate(-2deg)}
+.sbtn.sel{color:var(--red);background:rgba(255,248,228,.82)}
+.sbtn.sel::before{border-color:var(--red)}
+.sbtn .ink{left:16%;top:5px;width:68%;height:calc(100% - 10px)}
+.ends{display:flex;justify-content:space-between;gap:12px;font:400 17px/1.25 'Patrick Hand',cursive;color:var(--pencil);margin-top:8px}
+.ends span:last-child{text-align:right}
+
+.grow{padding:16px 0;border-top:1.5px dashed rgba(42,29,22,.25)}
+.grow:first-child{border-top:none;padding-top:2px}
+.gtext{font-weight:500;margin-bottom:10px}
+.gtext b{font:600 15px Grandstander,cursive;color:var(--red);margin-right:6px}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{position:relative;background:rgba(255,251,240,.42);border:none;border-radius:20px;padding:7px 14px;font-size:14px;transition:transform .15s}
+.chip::before{border-radius:20px 16px 22px 14px}
+.chip:hover{transform:rotate(-1deg)}
+.chip.sel{color:var(--red);font-weight:600;background:rgba(255,248,228,.82)}
+.chip.sel::before{border-color:transparent}
+.chip .ink{left:-6px;top:-6px;width:calc(100% + 12px);height:calc(100% + 12px)}
+.glegend{font:400 17px 'Patrick Hand',cursive;color:var(--pencil);margin:-6px 0 8px}
+
+.nums{display:flex;flex-direction:column;gap:16px}
+.nrow label{display:block;font-weight:500;margin-bottom:4px}
+.nrow label b{font:600 15px Grandstander,cursive;color:var(--red);margin-right:6px}
+.nwrap{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
+.nwrap input{max-width:150px}
+.nwrap .unit{font:400 17px 'Patrick Hand',cursive;color:var(--pencil);white-space:nowrap}
+.nwrap .vnd{font:400 18px 'Patrick Hand',cursive;color:var(--blue);white-space:nowrap}
+.warn{margin-top:14px;font:400 19px 'Patrick Hand',cursive;color:var(--red)}
+
+/* nút */
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px}
+.back{background:none;border:none;color:var(--pencil);padding:8px 2px;font:400 20px 'Patrick Hand',cursive}
+.back::before{content:"← "}
+.back:hover{color:var(--red)}
+.back[hidden]{visibility:hidden;display:block}
+.next{position:relative;isolation:isolate;background:none;color:var(--cream);border:none;padding:13px 30px;font:600 16px Grandstander,cursive;letter-spacing:.14em;text-transform:uppercase;transition:transform .12s,opacity .2s}
+.next::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--maroon);border-radius:4px;filter:url(#rough2);-webkit-mask-image:var(--speckle);mask-image:var(--speckle);-webkit-mask-size:180px;mask-size:180px}
+.next::after{content:"";position:absolute;inset:4px;z-index:-1;background:var(--maroon);border-radius:3px}
+.next:not(:disabled):hover{transform:rotate(-1.5deg) scale(1.04)}
+.next:not(:disabled):active{transform:scale(.94)}
+.next:disabled{opacity:.32;cursor:not-allowed}
+.pulse{animation:wiggle 2.6s 1.8s infinite}
+@keyframes wiggle{0%,78%,100%{transform:none}82%{transform:rotate(-4deg) scale(1.05)}87%{transform:rotate(4deg) scale(1.05)}92%{transform:rotate(-2deg)}96%{transform:rotate(1deg)}}
+.kbd{font:400 16px 'Patrick Hand',cursive;color:var(--pencil);text-align:center;margin-top:14px;opacity:.85}
+@media (hover:none){.kbd{display:none}}
+
+/* bìa */
+.cover .file{font:600 13px Grandstander,cursive;letter-spacing:.24em;color:var(--red);text-transform:uppercase}
+.cover h1{font:700 40px/1.06 Grandstander,cursive;text-transform:uppercase;margin:12px 0 18px;color:var(--ink);filter:url(#rough)}
+.cover p{margin:0 0 12px;color:#3d2e22}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin:18px 0 4px;padding:12px 0;border-top:1.5px dashed rgba(42,29,22,.35);border-bottom:1.5px dashed rgba(42,29,22,.35);font:600 13px Grandstander,cursive;letter-spacing:.12em;text-transform:uppercase;color:var(--maroon)}
+.tw{position:relative}
+.tw .ghost-t{visibility:hidden}
+.tw .typed{position:absolute;left:0;top:0;right:0}
+.caret{display:inline-block;width:3px;height:.85em;background:var(--red);margin-left:4px;vertical-align:-2px;animation:blink .8s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.secret,.topsecret,.stamp{color:var(--red);border:3.5px solid var(--red);font-family:Grandstander,cursive;font-weight:700;text-transform:uppercase;border-radius:5px;mix-blend-mode:multiply;-webkit-mask-image:var(--speckle);mask-image:var(--speckle);-webkit-mask-size:180px;mask-size:180px}
+.secret{position:absolute;top:22px;right:20px;font-size:20px;letter-spacing:.24em;padding:2px 12px;opacity:0;animation:slamS .5s 2.5s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes slamS{0%{transform:scale(2.8) rotate(28deg);opacity:0}100%{transform:rotate(12deg);opacity:.85}}
+.reward{position:relative;display:flex;gap:12px;align-items:center;background:linear-gradient(170deg,#f8e294,#efcd6a);border-radius:2px;padding:16px 16px 14px;margin:20px 4px 0;font:400 19px/1.3 'Patrick Hand',cursive;color:#3a2a10;transform:rotate(-1.2deg);box-shadow:0 8px 14px rgba(60,35,10,.25)}
+.reward::before{content:"";position:absolute;top:-10px;left:50%;width:80px;height:20px;margin-left:-40px;background:rgba(255,255,255,.5);transform:rotate(-4deg);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.reward b{font-weight:400;color:var(--red)}
+.reward svg{flex:none;width:28px;height:28px}
+
+/* poster chương */
+.card.poster{padding:50px 26px 28px;color:var(--cream);text-align:center}
+.card.poster::before{
+  background:
+    radial-gradient(ellipse 80% 45% at 50% 8%,rgba(255,214,160,.22),transparent 70%),
+    radial-gradient(ellipse 75% 70% at 50% 45%,transparent 50%,rgba(20,4,2,.6) 100%),
+    var(--grain),
+    var(--crumple),
+    #7e1d14;
+  background-size:auto,auto,200px 200px,520px 520px;
+  background-blend-mode:screen,multiply,multiply,multiply}
+.kick{font:600 12px Grandstander,cursive;letter-spacing:.3em;text-transform:uppercase;color:rgba(243,230,204,.75)}
+.ptitle{font:700 50px/1.02 Grandstander,cursive;text-transform:uppercase;margin:16px 0 8px;color:var(--cream);filter:url(#rough2)}
+.redact{position:relative;display:inline-block}
+.redact::after{content:"";position:absolute;inset:-3px -10px;background:#160b08;transform-origin:right;animation:unredact .6s .95s cubic-bezier(.7,0,.3,1) forwards}
+@keyframes unredact{to{transform:scaleX(0)}}
+.psub{font:400 26px 'Patrick Hand',cursive;color:var(--gold);margin-bottom:4px}
+.pdesc{color:rgba(243,230,204,.82);max-width:420px;margin:0 auto}
+.toc{list-style:none;margin:22px auto 6px;padding:16px 0 0;max-width:360px;text-align:left;border-top:1.5px dashed rgba(243,230,204,.4)}
+.toc li{display:flex;gap:12px;align-items:baseline;padding:3px 6px;font-size:15px;color:rgba(243,230,204,.55)}
+.toc li b{width:32px;flex:none;font:600 14px Grandstander,cursive;color:var(--gold);text-align:right;opacity:.8}
+.toc li span{position:relative;display:inline-block}
+.toc li.done span{text-decoration:line-through;text-decoration-color:rgba(243,230,204,.75);text-decoration-thickness:2px}
+.toc li.done{color:rgba(243,230,204,.42)}
+.toc li.now{color:var(--cream);font-weight:600}
+.toc li.now b{opacity:1}
+.toc .ink{left:-26px;top:-9px;width:calc(100% + 52px);height:calc(100% + 18px)}
+.toc .ink path{stroke:var(--gold);stroke-width:1.8;stroke-dashoffset:0;animation:draw .7s 1.2s ease-out backwards}
+.pfoot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-top:16px;padding-top:12px;border-top:1.5px dashed rgba(243,230,204,.4);font:400 18px/1.25 'Patrick Hand',cursive;color:var(--gold);text-align:left}
+.pfoot .no{flex:none;border:1.5px solid rgba(243,230,204,.6);padding:3px 10px;font:600 13px Grandstander,cursive;letter-spacing:.1em;color:var(--cream)}
+.poster .nav{justify-content:center;flex-direction:column}
+.poster .back{order:2;color:rgba(243,230,204,.7)}
+.poster .back:hover{color:var(--cream)}
+.poster .next{color:var(--maroon)}
+.poster .next::before,.poster .next::after{background:var(--cream)}
+
+.seal{position:relative;display:block;width:96px;height:96px;margin:6px auto 0;padding:0;background:none;border:none;filter:drop-shadow(0 6px 5px rgba(0,0,0,.5));transition:transform .15s;animation:sealNudge 2.6s 2.2s infinite}
+.seal:hover{transform:scale(1.07) rotate(-5deg)}
+.seal:active{transform:scale(.92)}
+.seal .half{position:absolute;inset:0}
+.seal .half svg{display:block;width:100%;height:100%}
+.seal .l{clip-path:polygon(0 0,53% 0,46% 20%,57% 38%,44% 58%,55% 77%,47% 100%,0 100%)}
+.seal .r{clip-path:polygon(53% 0,100% 0,100% 100%,47% 100%,55% 77%,44% 58%,57% 38%,46% 20%)}
+.seal.broken{animation:none;pointer-events:none}
+.seal.broken .l{animation:crackL .55s cubic-bezier(.5,0,.8,.6) forwards}
+.seal.broken .r{animation:crackR .55s cubic-bezier(.5,0,.8,.6) forwards}
+@keyframes crackL{18%{transform:translate(-3px,0) rotate(-7deg)}100%{transform:translate(-46px,80px) rotate(-55deg);opacity:0}}
+@keyframes crackR{18%{transform:translate(3px,0) rotate(7deg)}100%{transform:translate(46px,80px) rotate(55deg);opacity:0}}
+@keyframes sealNudge{0%,82%,100%{transform:none}86%{transform:rotate(-8deg) scale(1.06)}91%{transform:rotate(7deg) scale(1.06)}96%{transform:rotate(-2deg)}}
+.seal-hint{font:400 19px 'Patrick Hand',cursive;color:var(--gold);margin-top:6px}
+
+/* tài liệu Casery */
+.topsecret{display:inline-block;font-size:16px;letter-spacing:.2em;padding:3px 12px;transform:rotate(-4deg);margin-bottom:14px;animation:slamC .5s .3s cubic-bezier(.2,1.6,.4,1) backwards}
+@keyframes slamC{0%{transform:scale(2.4) rotate(-16deg);opacity:0}100%{transform:rotate(-4deg);opacity:1}}
+.concept{border-left:3px solid var(--red);padding:4px 0 4px 18px;margin:8px 0 4px}
+.concept h3{font:700 46px/1 Grandstander,cursive;text-transform:uppercase;margin:0 0 14px;color:var(--red);filter:url(#rough2);animation:fadeUp .5s .5s backwards}
+.concept p{margin:0 0 12px}
+.rd{position:relative}
+.rd::after{content:"";position:absolute;inset:0 -4px;background:#1a120e;border-radius:2px;filter:url(#rough);transform-origin:right;animation:unredact .7s cubic-bezier(.7,0,.3,1) forwards;animation-delay:var(--d,.6s)}
+.video{position:relative;padding-top:56.25%;border-radius:4px;overflow:hidden;background:#000;margin-bottom:14px;box-shadow:0 6px 14px rgba(0,0,0,.35)}
+.video iframe,.video video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.video-note{font-size:13px;font-style:italic;opacity:.7;margin:-6px 0 16px;text-align:center}
+
+/* kết thúc */
+.end{text-align:center;padding:42px 22px 28px}
+.stamp{display:inline-block;font-size:26px;letter-spacing:.16em;padding:6px 20px;transform:rotate(-7deg);opacity:.9;animation:stamp .55s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes stamp{0%{transform:scale(2.4) rotate(-16deg);opacity:0}100%{transform:rotate(-7deg);opacity:.9}}
+.end h2{font:700 32px/1.08 Grandstander,cursive;text-transform:uppercase;margin:24px 0 10px}
+.end p{color:#4a3a2c;max-width:440px;margin:0 auto 10px}
+.end.hit{animation:shake .45s .35s both}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(-6px,3px) rotate(-.6deg)}40%{transform:translate(5px,-3px)}60%{transform:translate(-3px,2px)}80%{transform:translate(2px,-1px)}}
+.end.hit h2,.end.hit > p{animation:fadeUp .5s .6s backwards}
+.idcard{position:relative;margin:28px auto 6px;max-width:400px;text-align:left;background:#f7eedb;border-radius:4px;overflow:hidden;box-shadow:0 10px 20px rgba(50,30,10,.3);transform:rotate(1.2deg)}
+.idcard.flip{animation:flipIn .85s 1s cubic-bezier(.2,1.2,.4,1) backwards}
+@keyframes flipIn{from{opacity:0;transform:perspective(800px) rotateY(-90deg) scale(.9)}to{opacity:1;transform:rotate(1.2deg)}}
+.idcard .hd{position:relative;overflow:hidden;background:var(--maroon);color:var(--cream);font:600 12px Grandstander,cursive;letter-spacing:.2em;text-transform:uppercase;padding:10px 16px;display:flex;justify-content:space-between}
+.idcard .bd{padding:16px 18px 18px;background:var(--grain);background-size:200px}
+.idcard .lbl{font:400 16px 'Patrick Hand',cursive;color:var(--pencil)}
+.idcard .role{font:700 32px/1.05 Grandstander,cursive;text-transform:uppercase;color:var(--red);filter:url(#rough);animation:fadeUp .5s 1.6s backwards}
+.idcard .desc{font:400 18px/1.3 'Patrick Hand',cursive;color:var(--quiet);margin:6px 0 14px}
+.idcard dl{display:grid;grid-template-columns:minmax(100px,40%) 1fr;gap:4px 14px;margin:0;font-size:13.5px;padding-top:12px;border-top:1.5px dashed rgba(42,29,22,.3)}
+.idcard dt{color:var(--quiet);padding-top:3px}
+.idcard dd{margin:0;font:400 19px/1.25 'Patrick Hand',cursive;color:var(--blue)}
+.end.hit .share{animation:fadeUp .5s 2s backwards}
+.share{margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.ghost{position:relative;background:none;border:none;color:var(--red);padding:11px 22px;font:600 14px Grandstander,cursive;letter-spacing:.12em;text-transform:uppercase}
+.ghost::before{border-color:var(--red)}
+.ghost:hover{transform:rotate(-1deg)}
+.small{font-size:13px;color:var(--quiet)}
+.err{color:var(--red);font-weight:600}
+.scanner{position:relative;width:96px;height:96px;margin:6px auto 18px;border:2px dashed rgba(42,29,22,.4);border-radius:12px;overflow:hidden;display:grid;place-items:center}
+.scanner svg{width:60px;height:60px}
+.beam{position:absolute;left:0;right:0;height:3px;background:var(--gold);box-shadow:0 0 14px 2px var(--gold);animation:scan 1s ease-in-out infinite alternate}
+@keyframes scan{from{top:0}to{top:calc(100% - 3px)}}
+.scanlog{font:400 20px 'Patrick Hand',cursive;color:var(--red);min-height:24px}
+
+
+/* ===== PHONG CÁCH VẼ TAY (nét mực dày, sticker) ===== */
+:root{--ink:#1f1612}
+body{font-family:Nunito,Arial,sans-serif}
+.brand{letter-spacing:.08em}
+.dot{border-width:2.5px;font-weight:900}
+.card::before{clip-path:none!important;border-radius:16px 12px 18px 10px}
+.card::after{border-radius:16px}
+.rim{position:absolute;inset:0;z-index:1;pointer-events:none;border:3px solid var(--ink);border-radius:16px 12px 18px 10px;filter:url(#rough)}
+.rim::after{content:"";position:absolute;inset:3px -3px -4px 4px;border:1.5px solid rgba(31,22,18,.3);border-radius:12px 18px 10px 16px;transform:rotate(-.35deg)}
+.poster .rim{border-color:#160604}
+.poster .rim::after{border-color:rgba(0,0,0,.35)}
+.tab{z-index:3}
+/* ô đáp án kiểu sticker: viền mực, bóng đổ cứng, bấm thì lún */
+.opt,.sbtn,.chip{isolation:isolate;background:none!important;transition:transform .12s}
+.opt::before,.sbtn::before,.chip::before{z-index:-1;background:#fffaf2;border:2.6px solid var(--ink)!important;border-radius:14px 10px 15px 9px}
+.opt::after,.sbtn::after,.chip::after{content:"";position:absolute;inset:0;z-index:-2;background:var(--ink);border:none;border-radius:14px 10px 15px 9px;transform:translateY(4px) rotate(0deg);filter:url(#rough);transition:transform .12s}
+.chip::before,.chip::after{border-radius:22px 18px 24px 16px}
+.opt:hover,.sbtn:hover,.chip:hover{transform:translateY(-2px)}
+.opt:hover::after,.sbtn:hover::after,.chip:hover::after{transform:translateY(6px)}
+.opt:active,.sbtn:active,.chip:active{transform:translateY(3px)}
+.opt:active::after,.sbtn:active::after,.chip:active::after{transform:translateY(1px)}
+.opt.sel::before,.sbtn.sel::before,.chip.sel::before{background:#f8de96}
+.sel .hl{background-size:0 0!important}
+.opt .k::before{z-index:-1;border:2.2px solid var(--ink)!important;background:#fff}
+.opt.multi.sel .k::before{background:#fff;border-color:var(--red)!important}
+.opt.sel:not(.multi) .k::before{border-color:transparent!important;background:transparent}
+.opt .k{color:var(--ink);font-weight:900}
+/* nút chính: viên thuốc mực dày */
+.next{border-radius:999px;padding:13px 30px;font:900 17px Grandstander,cursive;letter-spacing:.05em;color:var(--cream)}
+.next::before{inset:0;background:var(--maroon);border:3px solid var(--ink);border-radius:999px;filter:url(#rough);-webkit-mask-image:none;mask-image:none}
+.next::after{inset:0;z-index:-2;background:var(--ink);border-radius:999px;transform:translateY(5px);filter:url(#rough);transition:transform .12s}
+.next:not(:disabled):hover{transform:translateY(-2px) rotate(-1deg)}
+.next:not(:disabled):hover::after{transform:translateY(7px)}
+.next:not(:disabled):active{transform:translateY(4px)}
+.next:not(:disabled):active::after{transform:translateY(1px)}
+.next:disabled{opacity:.4}
+.poster .next::before{background:var(--cream);border-color:#160604}
+.poster .next::after{background:#160604}
+.ghost{isolation:isolate;color:var(--ink);border-radius:999px;font:900 14px Grandstander,cursive;letter-spacing:.04em}
+.ghost::before{z-index:-1;background:#fffaf2;border:2.6px solid var(--ink)!important;border-radius:999px}
+.ghost::after{content:"";position:absolute;inset:0;z-index:-2;background:var(--ink);border-radius:999px;transform:translateY(4px);filter:url(#rough)}
+/* chữ tròn viết tay */
+.cover h1{font:900 40px/1.12 Grandstander,cursive;text-transform:none;letter-spacing:-.01em}
+.cover .file,.kick,.meta{letter-spacing:.1em}
+.ptitle{font:900 42px/1.08 Grandstander,cursive}
+.concept h3{font:900 42px/1 Grandstander,cursive}
+.end h2{font:900 30px/1.15 Grandstander,cursive;text-transform:none}
+.idcard .role{font:900 28px/1.1 Grandstander,cursive;text-transform:none}
+.stamp,.secret,.topsecret{font-weight:900}
+.qtext{font:800 21px/1.38 Nunito,sans-serif}
+/* nhân vật doodle */
+body:not(.centered) .stage{padding-top:60px}
+body.centered .stage{padding-top:60px}
+.buddy{position:absolute;top:-56px;left:58px;width:52px;height:62px;z-index:4;animation:bob 3s ease-in-out infinite}
+.buddy svg{width:100%;height:100%;overflow:visible;filter:url(#rough)}
+.buddy .pupil{transform:translate(var(--px,0px),var(--py,0px));transition:transform .15s}
+.buddy .eyes{transform-origin:30px 33px;animation:blink2 4.5s infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-3px) rotate(2deg)}}
+@keyframes blink2{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.bubble{position:absolute;left:60px;top:-4px;white-space:nowrap;background:#fffaf2;color:var(--ink);font:700 15px/1 Grandstander,cursive;padding:8px 12px;border:2.5px solid var(--ink);border-radius:14px 12px 15px 11px;box-shadow:0 3px 0 var(--ink);opacity:0;transform:scale(.4) rotate(-6deg);transform-origin:left bottom;transition:opacity .15s,transform .25s cubic-bezier(.3,1.8,.5,1);pointer-events:none}
+.bubble::before{content:"";position:absolute;left:-9px;bottom:6px;width:12px;height:12px;background:#fffaf2;border-left:2.5px solid var(--ink);border-bottom:2.5px solid var(--ink);transform:rotate(45deg) skew(8deg,8deg)}
+.bubble.show{opacity:1;transform:none}
+/* hình vẽ nguệch ngoạc trên nền */
+.doodles{position:fixed;inset:0;z-index:0;pointer-events:none}
+.doodles svg{position:absolute;width:70px;height:70px;fill:none;stroke:rgba(243,230,204,.13);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;filter:url(#rough)}
+@media (max-width:520px){
+  .cover h1{font-size:31px}
+  .ptitle{font-size:31px}
+  .concept h3{font-size:34px}
+  .end h2{font-size:26px}
+  .buddy{left:52px}
+  .doodles{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;animation-delay:0s!important;animation-iteration-count:1!important;transition:none!important}
+  body::before,.grain{display:none}
+}
+@media (max-width:520px){
+  .card{padding:48px 18px 22px}
+  .card.poster{padding:48px 18px 24px}
+  .qtext{font-size:19px}
+  .cover h1{font-size:32px}
+  .ptitle{font-size:36px;margin:12px 0 4px}
+  .psub{font-size:22px}
+  .pdesc{font-size:15px}
+  .toc{column-count:2;column-gap:10px;margin-top:14px;padding-top:12px}
+  .toc li{break-inside:avoid;gap:6px;padding:2px 2px;font-size:13.5px;line-height:1.35}
+  .toc li b{width:26px;font-size:12.5px}
+  .toc .ink{display:none}
+  .toc li.now span{background:rgba(201,165,90,.32);border-radius:3px 6px 4px 7px;padding:0 5px;margin-left:-5px;box-shadow:0 0 0 1px rgba(201,165,90,.25);animation:fadeUp .5s 1.1s ease-out backwards}
+  .pfoot{margin-top:10px;font-size:16px}
+  .poster .nav{margin-top:14px}
+  .seal{width:80px;height:80px}
+  .seal-hint{font-size:17px}
+  .concept h3{font-size:38px}
+  .dot{width:20px;height:20px;font-size:10px}
+  .sbtn{height:50px}
+  .secret{font-size:16px;top:18px;right:14px}
+  .tab{right:16px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <filter id="rough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter>
+  <radialGradient id="wax" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#d4493b"/><stop offset=".55" stop-color="#a3231a"/><stop offset="1" stop-color="#5e0f09"/></radialGradient>
+  <filter id="rough2" x="-5%" y="-10%" width="110%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="8" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter>
+</defs></svg>
+<div class="curtain" aria-hidden="true"></div>
+<div class="fx" id="fx" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="doodles" aria-hidden="true">
+  <svg viewBox="0 0 70 70" style="left:4%;top:24%;transform:rotate(-12deg)"><path d="M24 22c0-10 22-12 22 2 0 9-11 9-11 19"/><path d="M35 54v2"/></svg>
+  <svg viewBox="0 0 70 70" style="left:9%;top:62%;transform:rotate(14deg)"><circle cx="28" cy="28" r="15"/><path d="M39 39l16 16"/></svg>
+  <svg viewBox="0 0 70 70" style="right:6%;top:30%;transform:rotate(8deg)"><path d="M35 10l6 16 17 1-13 11 5 17-15-10-15 10 5-17-13-11 17-1z"/></svg>
+  <svg viewBox="0 0 70 70" style="right:10%;top:68%;transform:rotate(-20deg)"><ellipse cx="24" cy="44" rx="7" ry="11"/><circle cx="20" cy="27" r="2.5"/><circle cx="27" cy="26" r="2.5"/><ellipse cx="46" cy="30" rx="7" ry="11"/><circle cx="42" cy="13" r="2.5"/><circle cx="49" cy="12" r="2.5"/></svg>
+  <svg viewBox="0 0 70 70" style="left:15%;top:42%;transform:rotate(4deg)"><path d="M35 35c0-4 6-4 6 0 0 8-12 8-12 0 0-12 18-12 18 0 0 16-24 16-24 0 0-20 30-20 30 0"/></svg>
+  <svg viewBox="0 0 70 70" style="right:15%;top:48%;transform:rotate(-6deg)"><path d="M12 50c14-4 26-16 34-34"/><path d="M36 14l10 2 2 10"/></svg>
+</div>
+<div id="preview" class="preview" hidden>Preview: answers are not submitted</div>
+<header class="top" id="top" hidden>
+  <div class="brand"><span>Survey case file<button class="sndbtn" id="snd" type="button"></button></span><span class="pct"><span class="clues" id="clues" title="Questions answered"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M15 15l6 6"/></svg><b id="cluesN">0</b> clues</span><span id="pct">0%</span></span></div>
+  <div class="track" id="track"><div class="fill" id="fill"></div></div>
+  <div class="chapname" id="chapname"></div>
+</header>
+<main class="stage"><div id="app"></div></main>
+
+<script>
+/* ====== CẤU HÌNH ====== */
+const CONFIG = {
+  // Dán URL Web App của Google Apps Script (kết thúc bằng /exec). Để trống = chế độ xem trước, không gửi dữ liệu.
+  endpoint: 'https://script.google.com/macros/s/AKfycbzCRrliTPlKS5wOd0M8uOI09spfGkZ4owPyTeepN3hMC9TxGzCg_0TTCTAOfrnF2SbE/exec',
+  // Trailer: link nhúng YouTube (https://www.youtube.com/embed/MA_VIDEO) hoặc đường dẫn file .mp4. Để trống thì chỉ hiện đoạn mô tả.
+  trailerUrl: '../media/casery-trailer-en.mp4',
+  // v2: giao diện mới + trailer 3D ở trang giới thiệu (cột phien_ban trong Google Sheet để tách nhóm người trả lời)
+  version: 'phase1-v2-en'
+};
+
+/* ====== BẢNG HỎI ====== */
+const AGREE = ['Hoàn toàn không đồng ý', 'Hoàn toàn đồng ý'];
+const CHAPTERS = [null,
+  {t:'Vài câu mở đầu', d:'Xác nhận để bắt đầu.', k:'Xác minh danh tính'},
+  {t:'Về bạn', d:'Ba câu ngắn về bạn.', k:'Lập hồ sơ nhân chứng'},
+  {t:'Bạn chơi game thế nào', d:'Thiết bị, thể loại và những hoạt động bạn hay tham gia.', k:'Khám nghiệm thói quen'},
+  {t:'Chơi cùng người khác', d:'Những lần bạn chơi game cùng bạn bè và người quen.', k:'Truy vết đồng đội'},
+  {t:'Thời gian chơi', d:'Một buổi chơi dài bao lâu thì vừa.', k:'Dựng lại dòng thời gian'},
+  {t:'Phối hợp và giao tiếp', d:'Chuyện thường xảy ra khi chơi theo nhóm.', k:'Nghe lén bộ đàm'},
+  {t:'Chi tiêu cho game', d:'Bạn đã trả tiền cho gì và muốn trả theo cách nào.', k:'Lần theo dòng tiền'},
+  {t:'Tìm game mới', d:'Bạn biết đến game mới từ đâu.', k:'Truy nguồn tin'},
+  {t:'Một ý tưởng game', d:'Xem giới thiệu một game nhóm đang phát triển, rồi cho nhóm biết bạn nghĩ gì.', k:'Tài liệu tối mật'}
+];
+const OBST = ['Khó thống nhất giờ chơi','Không đủ người','Mỗi người dùng máy hoặc nền tảng khác nhau','Bạn bè không thích cùng một game','Mỗi người phải tự mua game','Máy yếu hoặc mạng lag','Không ai chịu đứng ra rủ'];
+const playsWithOthers = A => A.q14 && A.q14 !== 'Không';
+const obstaclesChosen = A => (A.q19 || []).filter(v => v !== 'Không gặp trở ngại nào');
+
+const Q = [
+ {id:'q1',sec:1,type:'single',text:'Bạn đồng ý để câu trả lời được dùng ẩn danh cho đồ án môn học?',opts:['Đồng ý',{v:'Không đồng ý',end:'declined'}]},
+ {id:'q2',sec:1,type:'single',text:'Trong 3 tháng qua, bạn có chơi game điện tử trên bất kỳ thiết bị nào không?',opts:['Có',{v:'Không',end:'screened'}]},
+ {id:'q3',sec:1,type:'single',text:'Bạn bao nhiêu tuổi?',opts:['Dưới 16','16–18','19–24','25–30','31–40','Trên 40']},
+
+ {id:'q4',sec:2,type:'single',text:'Hiện bạn sống ở đâu?',opts:['TP.HCM','Hà Nội','Đà Nẵng','Tỉnh, thành khác ở Việt Nam','Ngoài Việt Nam']},
+ {id:'q5',sec:2,type:'single',text:'Công việc hiện tại của bạn?',opts:['Học sinh','Sinh viên','Đi làm dưới 2 năm','Đi làm từ 2 năm trở lên','Freelancer',{v:'Khác',other:true}]},
+ {id:'q6',sec:2,type:'single',text:'Mỗi tháng bạn chi khoảng bao nhiêu cho giải trí (game, phim, đi chơi)?',opts:['Dưới 500.000 VND','500.000–1.000.000 VND','1.000.001–2.000.000 VND','2.000.001–5.000.000 VND','Trên 5.000.000 VND']},
+
+ {id:'q7',sec:3,type:'single',text:'Bạn chơi game (trên bất kỳ thiết bị nào) thường xuyên đến mức nào?',opts:['Gần như mỗi ngày','Vài lần mỗi tuần','Vài lần mỗi tháng','Ít hơn một lần mỗi tháng']},
+ {id:'q8',sec:3,type:'multi',text:'Bạn có những thiết bị nào dùng được để chơi game?',opts:['PC để bàn','Laptop','Điện thoại','Máy console','Máy tính bảng']},
+ {id:'q9',sec:3,type:'multi',text:'Bạn thường chơi game trên thiết bị nào?',opts:['PC (máy bàn)','Laptop','Điện thoại, máy tính bảng','Console (PlayStation, Xbox, Switch)']},
+ {id:'q10',sec:3,type:'single',text:'Máy tính bạn đang dùng chơi game 3D (ví dụ Phasmophobia, Valorant, Genshin Impact) như thế nào?',opts:['Chạy mượt','Chạy được nhưng phải giảm đồ họa','Thường giật, lag','Tôi không có máy tính','Tôi không biết']},
+ {id:'q11',sec:3,type:'multi',text:'Bạn hay chơi những thể loại game nào?',opts:['Trinh thám, điều tra','Giải đố','Cốt truyện, nhập vai','Kinh dị','Co-op phối hợp (ví dụ It Takes Two, Phasmophobia)','Social deduction (ví dụ Among Us, Ma Sói)','Bắn súng, MOBA, đối kháng','Mô phỏng, nhẹ nhàng',{v:'Khác',other:true}]},
+ {id:'q12',sec:3,type:'multi',text:'Trong 6 tháng qua, bạn đã tham gia hoạt động nào dưới đây?',opts:['Chơi game trinh thám hoặc giải đố','Chơi phòng thoát hiểm (escape room)','Chơi kịch bản sát, murder mystery nhập vai','Chơi board game suy luận (Ma Sói, Avalon, Cluedo…)','Đọc tiểu thuyết, xem phim hoặc nghe podcast trinh thám',{v:'Không tham gia hoạt động nào',excl:true}]},
+
+ {id:'q13',sec:4,type:'scale',text:'Bạn thích chơi game một mình hay cùng người khác?',ends:['Chỉ một mình','Chỉ cùng người khác']},
+ {id:'q14',sec:4,type:'single',text:'Trong 3 tháng qua, bạn có chơi game cùng người quen (bạn bè, người yêu, đồng nghiệp, người nhà) không?',opts:['Có, chơi online','Có, chơi chung một chỗ','Có, cả hai kiểu','Không']},
+ {id:'q15',sec:4,type:'single',when:playsWithOthers,text:'Bạn có nhóm bạn cố định hay chơi game online cùng không?',opts:['Có, 2–3 người','Có, 4–5 người','Có, từ 6 người','Không có nhóm cố định']},
+ {id:'q16',sec:4,type:'single',when:playsWithOthers,text:'Khi nhóm chơi game cùng nhau, ai thường rủ và chọn game?',opts:['Hầu như là tôi','Tôi và người khác thay phiên','Thường là người khác','Tôi không chơi cùng bạn bè']},
+ {id:'q17',sec:4,type:'single',when:playsWithOthers,text:'Khi chơi game nhiều người, lý do chính của bạn là gì?',opts:['Vì được chơi cùng bạn bè','Vì thích thử thách, giải đố','Vì thích cốt truyện, khám phá','Vì muốn thắng, leo hạng','Để giải trí, giết thời gian','Tôi không chơi game nhiều người']},
+ {id:'q18',sec:4,type:'multi',when:playsWithOthers,text:'Bạn thường chơi game cùng nhóm vào lúc nào?',opts:['Tối ngày thường','Khuya (sau 23h)','Cuối tuần','Ngày lễ, kỳ nghỉ','Không cố định']},
+ {id:'q19',sec:4,type:'multi',when:playsWithOthers,text:'Trong 3 tháng qua, khi muốn chơi game cùng bạn, bạn đã gặp những trở ngại nào?',opts:[...OBST,{v:'Không gặp trở ngại nào',excl:true},{v:'Khác',other:true}]},
+ {id:'q20',sec:4,type:'single',when:A=>playsWithOthers(A)&&obstaclesChosen(A).length>=2,dyn:A=>obstaclesChosen(A),text:'Trong những trở ngại bạn vừa chọn, trở ngại nào lớn nhất?'},
+ {id:'q21',sec:4,type:'single',when:playsWithOthers,text:'Trong 3 tháng qua, bạn đã bao nhiêu lần bỏ ý định chơi một game nhiều người vì không gom đủ người?',opts:['Chưa lần nào','1 lần','2–3 lần','Nhiều hơn 3 lần']},
+ {id:'q22',sec:4,type:'scale',when:playsWithOthers,text:'Bạn đồng ý đến đâu với câu: “Tôi sẵn sàng chơi một thể loại không phải sở thích của mình nếu được chơi cùng nhóm bạn thân.”',ends:AGREE},
+
+ {id:'q23',sec:5,type:'single',text:'Vào buổi tối ngày thường, một phiên chơi game cùng bạn dài tối đa bao lâu thì bạn thấy thoải mái?',opts:['Dưới 30 phút','30–44 phút','45–60 phút','61–90 phút','Trên 90 phút','Tôi không chơi game vào tối ngày thường']},
+ {id:'q24',sec:5,type:'grid',text:'Bạn đồng ý đến đâu với các câu sau?',ends:AGREE,rows:[
+   ['a','Tôi ngại bắt đầu một game khi không biết sẽ mất bao lâu mới xong.'],
+   ['b','Tôi ngại bắt đầu một game khi không lưu được tiến độ để chơi tiếp hôm sau.'],
+   ['c','Phải đọc nhiều hồ sơ hoặc hội thoại dài khiến tôi giảm hứng thú với game.']]},
+
+ {id:'q25',sec:6,type:'grid',text:'Trong các game chơi nhóm (co-op) bạn từng chơi, những tình huống sau xảy ra thường xuyên đến mức nào?',
+   cols:['Không bao giờ','Hiếm khi','Thỉnh thoảng','Thường xuyên','Luôn luôn','Tôi chưa chơi game co-op'],rows:[
+   ['a','Một vài người làm gần hết, những người còn lại chỉ đi theo.'],
+   ['b','Mỗi người tự chơi phần của mình, không ai cần thông tin của ai.'],
+   ['c','Tranh luận trong nhóm biến thành cãi nhau, làm mất vui.'],
+   ['d','Một người mất kết nối khiến cả nhóm phải dừng lại.']]},
+ {id:'q26',sec:6,type:'grid',text:'Khi chọn một game trinh thám hoặc giải đố, những yếu tố sau quan trọng với bạn đến mức nào?',ends:['Không quan trọng','Rất quan trọng'],rows:[
+   ['a','Cốt truyện logic, chứng cứ khớp với nhau'],
+   ['b','Độ khó công bằng, không phải đoán mò'],
+   ['c','Có tình tiết bất ngờ, đảo ngược'],
+   ['d','Mỗi người có vai trò và thông tin riêng'],
+   ['e','Có yếu tố hài hước, đối đáp dí dỏm']]},
+ {id:'q27',sec:6,type:'scale',text:'Bạn đồng ý đến đâu với câu: “Ở cuối một game trinh thám, tôi muốn phải chỉ ra chứng cứ để chứng minh kết luận của mình, chứ không chỉ chọn một đáp án đúng hoặc sai.”',ends:AGREE},
+ {id:'q28',sec:6,type:'multi',text:'Bạn đã từng bỏ dở một game điều tra hoặc giải đố vì lý do nào?',opts:['Không hiểu cách liên kết các manh mối','Bị tụt lại, không theo kịp nhóm','Bị kẹt quá lâu mà không có đầu mối nào','Phải đọc quá nhiều chữ','Tình tiết lặp lại, nhàm chán','Không đủ thời gian chơi hết','Bạn bè bỏ nên tôi bỏ theo',{v:'Tôi chưa từng bỏ dở game nào loại này',excl:true},{v:'Tôi chưa chơi game điều tra hoặc giải đố',excl:true}]},
+ {id:'q29',sec:6,type:'single',text:'Khi chơi game cùng nhóm, bạn bật mic nói chuyện thường xuyên đến mức nào?',opts:['Luôn luôn','Thường xuyên','Thỉnh thoảng','Hiếm khi','Không bao giờ']},
+ {id:'q30',sec:6,type:'multi',text:'Nếu không dùng mic, bạn muốn trao đổi với đồng đội bằng cách nào?',opts:['Chat chữ trong game','Đánh dấu vị trí, vật thể (ping)','Câu nói hoặc biểu cảm có sẵn','Ghim chứng cứ lên bảng chung','Dùng Discord','Dùng Messenger hoặc các ứng dụng khác',{v:'Tôi luôn dùng mic trong game',excl:true}]},
+
+ {id:'q31',sec:7,type:'multi',text:'Trong 12 tháng qua, bạn đã trả tiền cho những gì?',opts:['Game trên PC hoặc console','Game hoặc vật phẩm trên điện thoại','Game indie','Escape room hoặc quán board game','Bộ hồ sơ phá án',{v:'Chưa trả cho mục nào',excl:true}]},
+ {id:'q32',sec:7,type:'single',text:'Lần gần nhất nhóm bạn cần trả tiền cho một game, một phòng chơi hoặc một gói nội dung để chơi cùng nhau, việc trả tiền diễn ra thế nào?',opts:['Mỗi người tự trả phần của mình','Một người trả trước cho cả nhóm, sau đó chia lại','Một người trả cho cả nhóm, không chia lại','Game miễn phí, không ai phải trả','Chưa từng trả tiền để chơi chung']},
+ {id:'q33',sec:7,type:'multi',max:2,text:'Với một game của studio chưa nổi tiếng, điều gì khiến bạn sẵn sàng trả tiền?',opts:['Có bản chơi thử miễn phí','Đánh giá tốt trên Steam hoặc cộng đồng','Bạn bè đã chơi và giới thiệu','Giá thấp','Streamer hoặc TikToker tôi theo dõi đã chơi','Được hoàn tiền nếu không thích',{v:'Tôi không trả tiền cho game của studio chưa nổi tiếng',excl:true}]},
+ {id:'q34',sec:7,type:'grid',text:'Bạn đồng ý đến đâu với các câu sau?',ends:AGREE,rows:[
+   ['a','Nếu phải trả thêm tiền để mở một số chứng cứ, tôi sẽ bớt muốn mua game đó.'],
+   ['b','Nếu phải mua gợi ý khi bị kẹt giữa chừng, tôi sẽ bớt muốn mua game đó.'],
+   ['c','Nếu game có nạp coin (tiền ảo trong game, ví dụ Quân Huy của Liên Quân, Robux của Roblox), tôi sẽ bớt muốn mua game đó.'],
+   ['d','Tôi muốn một người mua là cả nhóm chơi được, thay vì ai cũng phải mua.']]},
+ {id:'q35',sec:7,type:'single',text:'Với một game phá án chơi nhóm, bạn thích cách trả nào nhất?',opts:['Một người mua, cả nhóm chơi','Mỗi người mua bản của mình','Mua từng vụ án riêng lẻ','Mua gói nhiều vụ án giá thấp hơn','Mua một lần toàn bộ game','Miễn phí, trả cho nội dung thêm']},
+ {id:'q36',sec:7,type:'grid',text:'Bạn sẵn sàng trả tiền đến mức nào trong từng trường hợp sau?',ends:['Chắc chắn không trả','Chắc chắn trả'],rows:[
+   ['a','Trả tiền để chơi một vụ án mới, sau khi đã thích vụ án đầu tiên'],
+   ['b','Trả tiền để chơi lại vụ án cũ với một kết thúc khác']]},
+
+ {id:'q37',sec:8,type:'single',text:'Khi xem trailer của một game chơi nhóm, điều gì khiến bạn muốn thử nhất?',opts:['Cảnh cả nhóm phối hợp với nhau','Cốt truyện, bí ẩn của vụ án','Đồ họa, không khí','Nhân vật','Khoảnh khắc hài hước hoặc bất ngờ']},
+ {id:'q38',sec:8,type:'scale',text:'Bạn đồng ý đến đâu với câu: “Tôi ngại tìm hiểu trước về một game trinh thám vì sợ bị tiết lộ nội dung.”',ends:AGREE},
+ {id:'q39',sec:8,type:'multi',max:2,text:'Bạn thường biết đến game mới qua kênh nào?',opts:['Bạn bè rủ hoặc giới thiệu','TikTok','YouTube','Facebook, nhóm cộng đồng game','Steam (gợi ý, trang chủ, sale)','Streamer trên Twitch hoặc Facebook Gaming','Discord',{v:'Khác',other:true}]},
+ {id:'q40',sec:8,type:'grid',text:'Bạn đồng ý đến đâu với các câu sau?',ends:AGREE,rows:[
+   ['a','Tôi hay thử một game mới khi bạn bè rủ.'],
+   ['b','Tôi xem review hoặc gameplay trước khi tải hoặc mua.'],
+   ['c','Dù được bạn bè rủ, tôi vẫn cần chơi thử miễn phí trước khi bỏ tiền.']]},
+
+ {id:'concept',sec:9,type:'concept'},
+ {id:'q41',sec:9,type:'numbers',text:'Với một vụ án như trên, một người mua cho cả phòng tối đa 4 người, mức giá nào là…',fields:[
+   ['a','…rẻ đến mức bạn nghi ngờ chất lượng?'],
+   ['b','…rẻ, đáng tiền?'],
+   ['c','…bắt đầu thấy đắt nhưng vẫn cân nhắc?'],
+   ['d','…quá đắt, chắc chắn không mua?']]},
+ {id:'q42',sec:9,type:'scale',text:'Sau khi xem giới thiệu, bạn muốn chơi thử Casery cùng bạn bè đến mức nào?',ends:['Hoàn toàn không muốn','Rất muốn']},
+ {id:'q43',sec:9,type:'text',long:true,optional:true,text:'Điều gì khiến bạn muốn hoặc ngại thử Casery?'},
+ {id:'q44',sec:9,type:'text',optional:true,contact:true,text:'Nếu muốn nhận lời mời chơi thử, hãy để lại email hoặc Discord.'}
+];
+
+/* ====== BẢN TIẾNG ANH: dịch hiển thị, giữ nguyên giá trị lưu ====== */
+const LBL={"Hồ sơ khảo sát người chơi game": "Gamer Survey Case File", "Khảo sát người chơi game": "Gamer survey", "Bản xem trước: câu trả lời không được gửi đi": "Preview: answers are not submitted", "Hồ sơ khảo sát": "Survey case file", "Hồ sơ khảo sát · Chương": "Survey case file · Chapter", "Chương ": "Chapter ", "Chương": "Chapter", "Câu": "Question", "Tiếp": "Next", "Quay lại": "Back", "Gửi hồ sơ": "Submit file", "Gửi lại": "Try again", "Không bắt buộc": "Optional", "Chọn một": "Choose one", "Chọn tất cả lựa chọn phù hợp": "Choose all that apply", "Chọn tối đa": "Choose up to", "Chọn một mức từ 1 đến 5": "Choose a level from 1 to 5", "Chọn một mức cho mỗi câu": "Choose one level for each statement", "Chọn một mức từ 1 đến 5 cho mỗi câu": "Choose a level from 1 to 5 for each statement", "Bạn chỉ chọn được tối đa": "You can choose at most", ". Bỏ một lựa chọn trước khi chọn thêm.": ". Unselect one before choosing another.", "Nhấn A, B, C… để chọn · Enter để tiếp": "Press A, B, C… to choose · Enter to continue", "Nhấn 1–5 để chọn · Enter để tiếp": "Press 1–5 to choose · Enter to continue", "Enter để tiếp": "Enter to continue", "Ghi rõ (không bắt buộc)": "Please specify (optional)", "Viết vài dòng nếu bạn muốn": "Write a few lines if you like", "Email hoặc tên Discord": "Email or Discord username", "<p class=\"small\" style=\"margin-top:8px\">Thông tin này được lưu tách riêng khỏi câu trả lời khảo sát.</p>": "<p class=\"small\" style=\"margin-top:8px\">This is stored separately from your survey answers.</p>", "Bật âm thanh": "Turn sound on", "Tắt âm thanh": "Turn sound off", "Âm thanh: bật": "Sound: on", "Âm thanh: tắt": "Sound: off", "Nên bật âm thanh để trải nghiệm trọn vẹn": "Turn on sound for the full experience", "Đã thu thập": "Collected", "Số câu đã trả lời": "Questions answered", "manh mối": "clues", " · Đã qua nửa vụ án": " · Halfway through the case", " · Chương cuối cùng": " · Final chapter", "Chạm vào con dấu để mở chương": "Tap the seal to open the chapter", "Bẻ niêm phong để vào chương ${n}": "Break the seal to enter chapter ${n}", "Các mức giá thường tăng dần từ a đến d. Bạn kiểm tra lại giúp nhóm; nếu đúng ý bạn, bấm Tiếp lần nữa.": "Prices usually increase from a to d. Please double-check; if this is what you meant, press Next again.", "Phản hồi không hợp lệ": "Invalid response", "[Xem trước] Dữ liệu sẽ gửi:": "[Preview] Data to be sent:", "câu này nè": "this one!", "từ từ thôi": "take your time", "ồ?": "oh?", "nghĩ kỹ nha": "think it over", "ghi rồi": "noted!", "à há": "aha", "hiểu rồi": "got it", "được": "nice", "xin chào!": "hello!", "mở hồ sơ nào": "let’s open the file", "xong rồi!": "all done!", "tuyệt vời": "awesome", "Bạn chơi game cùng bạn bè như thế nào?": "How do you play games with friends?", "Hồ sơ #001": "Case #001", "Hồ sơ #001 · Tuyệt mật": "Case #001 · Top secret", "MẬT": "SECRET", "TÀI LIỆU TỐI MẬT": "TOP SECRET", "Tài liệu tối mật": "Top-secret file", "Bộ hồ sơ phá án": "The case files", "Xin chào, chúng mình là nhóm sinh viên UEH đang thực hiện đồ án môn học về trải nghiệm chơi game cùng bạn bè.": "Hi! We’re a student team at UEH (University of Economics Ho Chi Minh City) working on a course project about playing games with friends.", "Không có câu trả lời đúng hay sai, bạn hãy chọn theo trải nghiệm thật của mình. Câu trả lời được ghi nhận ẩn danh và chỉ dùng cho mục đích học tập.": "There are no right or wrong answers, so please answer from your own experience. Responses are anonymous and used for academic purposes only.", "9 chương": "9 chapters", "Khoảng 12–15 phút": "About 12–15 minutes", "Ẩn danh": "Anonymous", "Hoàn thành hồ sơ để mở khóa": "Finish the file to unlock", "Thẻ điều tra viên": "Investigator ID card", "với mật danh của riêng bạn.": "with your own code name.", "Mở hồ sơ": "Open the file", "Tiếp tục hồ sơ": "Continue the file", "Mở hồ sơ khảo sát": "Open the survey file", "Làm lại từ đầu": "Start over", "<button class=\"back\" id=\"restart\">Làm lại từ đầu</button>": "<button class=\"back\" id=\"restart\">Start over</button>", "Có một hồ sơ đang chờ bạn": "A case file is waiting for you", "Chạm để mở": "Tap to open", "<p class=\"small\">Bạn đã gửi khảo sát này trên thiết bị này. Cảm ơn bạn.</p>": "<p class=\"small\">You have already submitted this survey on this device. Thank you.</p>", "Vài câu mở đầu": "A few opening questions", "Xác nhận để bắt đầu.": "Confirm to begin.", "Xác minh danh tính": "Identity check", "Về bạn": "About you", "Ba câu ngắn về bạn.": "Three short questions about you.", "Lập hồ sơ nhân chứng": "Witness profile", "Bạn chơi game thế nào": "How you play", "Thiết bị, thể loại và những hoạt động bạn hay tham gia.": "Devices, genres and the activities you enjoy.", "Khám nghiệm thói quen": "Habit forensics", "Chơi cùng người khác": "Playing with others", "Những lần bạn chơi game cùng bạn bè và người quen.": "The times you play games with friends and people you know.", "Truy vết đồng đội": "Tracing the squad", "Thời gian chơi": "Play time", "Một buổi chơi dài bao lâu thì vừa.": "How long a session should be.", "Dựng lại dòng thời gian": "Rebuilding the timeline", "Phối hợp và giao tiếp": "Teamwork and communication", "Chuyện thường xảy ra khi chơi theo nhóm.": "What usually happens when playing as a group.", "Nghe lén bộ đàm": "Wiretapping the radio", "Chi tiêu cho game": "Spending on games", "Bạn đã trả tiền cho gì và muốn trả theo cách nào.": "What you’ve paid for and how you’d like to pay.", "Lần theo dòng tiền": "Following the money", "Tìm game mới": "Finding new games", "Bạn biết đến game mới từ đâu.": "Where you hear about new games.", "Truy nguồn tin": "Tracing the source", "Một ý tưởng game": "A game idea", "Xem giới thiệu một game nhóm đang phát triển, rồi cho nhóm biết bạn nghĩ gì.": "See an introduction to a group game in development, then tell us what you think.", "Bạn đồng ý để câu trả lời được dùng ẩn danh cho đồ án môn học?": "Do you agree that your answers may be used anonymously for our course project?", "Đồng ý": "I agree", "Không đồng ý": "I do not agree", "Trong 3 tháng qua, bạn có chơi game điện tử trên bất kỳ thiết bị nào không?": "In the past 3 months, have you played video games on any device?", "Có": "Yes", "Không": "No", "Bạn bao nhiêu tuổi?": "How old are you?", "Dưới 16": "Under 16", "Trên 40": "Over 40", "Hiện bạn sống ở đâu?": "Where do you currently live?", "TP.HCM": "Ho Chi Minh City", "Hà Nội": "Hanoi", "Đà Nẵng": "Da Nang", "Tỉnh, thành khác ở Việt Nam": "Elsewhere in Vietnam", "Ngoài Việt Nam": "Outside Vietnam", "Công việc hiện tại của bạn?": "What is your current occupation?", "Học sinh": "High school student", "Sinh viên": "University student", "Đi làm dưới 2 năm": "Working, less than 2 years", "Đi làm từ 2 năm trở lên": "Working, 2 years or more", "Khác": "Other", "Mỗi tháng bạn chi khoảng bao nhiêu cho giải trí (game, phim, đi chơi)?": "About how much do you spend on entertainment each month (games, movies, going out)?", "Bạn chơi game (trên bất kỳ thiết bị nào) thường xuyên đến mức nào?": "How often do you play games (on any device)?", "Gần như mỗi ngày": "Almost every day", "Vài lần mỗi tuần": "A few times a week", "Vài lần mỗi tháng": "A few times a month", "Ít hơn một lần mỗi tháng": "Less than once a month", "Bạn có những thiết bị nào dùng được để chơi game?": "Which devices do you have that you can play games on?", "Bạn thường chơi game trên thiết bị nào?": "Which device do you usually play games on?", "Điện thoại": "Phone", "Máy tính bảng": "Tablet", "Điện thoại, máy tính bảng": "Phone or tablet", "Laptop": "Laptop", "PC để bàn": "Desktop PC", "PC (máy bàn)": "PC (desktop)", "Máy console": "Game console", "Máy tính bạn đang dùng chơi game 3D (ví dụ Phasmophobia, Valorant, Genshin Impact) như thế nào?": "How well does your computer run 3D games (e.g. Phasmophobia, Valorant, Genshin Impact)?", "Chạy mượt": "Runs smoothly", "Chạy được nhưng phải giảm đồ họa": "Runs, but I have to lower the graphics", "Thường giật, lag": "Often stutters or lags", "Tôi không có máy tính": "I don’t have a computer", "Tôi không biết": "I don’t know", "Bạn hay chơi những thể loại game nào?": "Which game genres do you usually play?", "Trinh thám, điều tra": "Detective, investigation", "Giải đố": "Puzzle", "Cốt truyện, nhập vai": "Story, role-playing", "Kinh dị": "Horror", "Co-op phối hợp (ví dụ It Takes Two, Phasmophobia)": "Co-op (e.g. It Takes Two, Phasmophobia)", "Social deduction (ví dụ Among Us, Ma Sói)": "Social deduction (e.g. Among Us, Werewolf)", "Bắn súng, MOBA, đối kháng": "Shooter, MOBA, fighting", "Mô phỏng, nhẹ nhàng": "Simulation, casual", "Trong 6 tháng qua, bạn đã tham gia hoạt động nào dưới đây?": "In the past 6 months, which of these activities have you done?", "Chơi game trinh thám hoặc giải đố": "Played detective or puzzle games", "Chơi phòng thoát hiểm (escape room)": "Played an escape room", "Chơi kịch bản sát, murder mystery nhập vai": "Played a murder mystery role-play (e.g. jubensha)", "Chơi board game suy luận (Ma Sói, Avalon, Cluedo…)": "Played deduction board games (Werewolf, Avalon, Cluedo…)", "Đọc tiểu thuyết, xem phim hoặc nghe podcast trinh thám": "Read, watched or listened to detective novels, films or podcasts", "Không tham gia hoạt động nào": "None of these", "Bạn thích chơi game một mình hay cùng người khác?": "Do you prefer playing games alone or with others?", "Chỉ một mình": "Only alone", "Chỉ cùng người khác": "Only with others", "Trong 3 tháng qua, bạn có chơi game cùng người quen (bạn bè, người yêu, đồng nghiệp, người nhà) không?": "In the past 3 months, have you played games with people you know (friends, partner, colleagues, family)?", "Có, chơi online": "Yes, online", "Có, chơi chung một chỗ": "Yes, in the same place", "Có, cả hai kiểu": "Yes, both", "Bạn có nhóm bạn cố định hay chơi game online cùng không?": "Do you have a regular group of friends you play online with?", "Có, 2–3 người": "Yes, 2–3 people", "Có, 4–5 người": "Yes, 4–5 people", "Có, từ 6 người": "Yes, 6 or more people", "Không có nhóm cố định": "No regular group", "Khi nhóm chơi game cùng nhau, ai thường rủ và chọn game?": "When your group plays together, who usually invites everyone and picks the game?", "Hầu như là tôi": "Almost always me", "Tôi và người khác thay phiên": "Me and others take turns", "Thường là người khác": "Usually someone else", "Tôi không chơi cùng bạn bè": "I don’t play with friends", "Khi chơi game nhiều người, lý do chính của bạn là gì?": "When you play multiplayer games, what is your main reason?", "Vì được chơi cùng bạn bè": "To play with friends", "Vì thích thử thách, giải đố": "I like challenges and puzzles", "Vì thích cốt truyện, khám phá": "I like stories and exploring", "Vì muốn thắng, leo hạng": "To win and climb the ranks", "Để giải trí, giết thời gian": "To relax and pass the time", "Tôi không chơi game nhiều người": "I don’t play multiplayer games", "Bạn thường chơi game cùng nhóm vào lúc nào?": "When do you usually play with your group?", "Tối ngày thường": "Weekday evenings", "Khuya (sau 23h)": "Late night (after 11 pm)", "Cuối tuần": "Weekends", "Ngày lễ, kỳ nghỉ": "Holidays, vacations", "Không cố định": "No fixed time", "Trong 3 tháng qua, khi muốn chơi game cùng bạn, bạn đã gặp những trở ngại nào?": "In the past 3 months, what got in the way when you wanted to play with friends?", "Khó thống nhất giờ chơi": "Hard to agree on a time", "Không đủ người": "Not enough people", "Mỗi người dùng máy hoặc nền tảng khác nhau": "Everyone uses different devices or platforms", "Bạn bè không thích cùng một game": "Friends don’t like the same games", "Mỗi người phải tự mua game": "Everyone has to buy the game themselves", "Máy yếu hoặc mạng lag": "Weak devices or laggy internet", "Không ai chịu đứng ra rủ": "Nobody wants to organize", "Không gặp trở ngại nào": "No obstacles", "Trong những trở ngại bạn vừa chọn, trở ngại nào lớn nhất?": "Of the obstacles you just chose, which is the biggest?", "Trong 3 tháng qua, bạn đã bao nhiêu lần bỏ ý định chơi một game nhiều người vì không gom đủ người?": "In the past 3 months, how many times did you give up on playing a multiplayer game because you couldn’t get enough people?", "Chưa lần nào": "Never", "1 lần": "Once", "2–3 lần": "2–3 times", "Nhiều hơn 3 lần": "More than 3 times", "Bạn đồng ý đến đâu với câu: “Tôi sẵn sàng chơi một thể loại không phải sở thích của mình nếu được chơi cùng nhóm bạn thân.”": "How much do you agree: “I’m willing to play a genre I don’t usually like if I get to play it with my close friends.”", "Hoàn toàn không đồng ý": "Strongly disagree", "Hoàn toàn đồng ý": "Strongly agree", "Vào buổi tối ngày thường, một phiên chơi game cùng bạn dài tối đa bao lâu thì bạn thấy thoải mái?": "On a weekday evening, what is the longest gaming session with friends that feels comfortable?", "Dưới 30 phút": "Under 30 minutes", "30–44 phút": "30–44 minutes", "45–60 phút": "45–60 minutes", "61–90 phút": "61–90 minutes", "Trên 90 phút": "Over 90 minutes", "Tôi không chơi game vào tối ngày thường": "I don’t play on weekday evenings", "Bạn đồng ý đến đâu với các câu sau?": "How much do you agree with the following statements?", "Tôi ngại bắt đầu một game khi không biết sẽ mất bao lâu mới xong.": "I hesitate to start a game when I don’t know how long it will take.", "Tôi ngại bắt đầu một game khi không lưu được tiến độ để chơi tiếp hôm sau.": "I hesitate to start a game if I can’t save my progress and continue another day.", "Phải đọc nhiều hồ sơ hoặc hội thoại dài khiến tôi giảm hứng thú với game.": "Having to read lots of documents or long dialogue makes a game less appealing to me.", "Trong các game chơi nhóm (co-op) bạn từng chơi, những tình huống sau xảy ra thường xuyên đến mức nào?": "In co-op games you’ve played, how often did the following happen?", "Không bao giờ": "Never", "Hiếm khi": "Rarely", "Thỉnh thoảng": "Sometimes", "Thường xuyên": "Often", "Luôn luôn": "Always", "Tôi chưa chơi game co-op": "I haven’t played co-op games", "Một vài người làm gần hết, những người còn lại chỉ đi theo.": "A few people did almost everything; the rest just followed along.", "Tranh luận trong nhóm biến thành cãi nhau, làm mất vui.": "Discussions turned into arguments and spoiled the fun.", "Một người mất kết nối khiến cả nhóm phải dừng lại.": "One person disconnecting made the whole group stop.", "Khi chơi game cùng nhóm, bạn bật mic nói chuyện thường xuyên đến mức nào?": "When playing with a group, how often do you use voice chat?", "Tôi luôn dùng mic trong game": "I always use voice chat", "Bạn đồng ý đến đâu với câu: “Ở cuối một game trinh thám, tôi muốn phải chỉ ra chứng cứ để chứng minh kết luận của mình, chứ không chỉ chọn một đáp án đúng hoặc sai.”": "How much do you agree: “At the end of a detective game, I want to point to evidence that proves my conclusion, not just pick a right or wrong answer.”", "Bạn đã từng bỏ dở một game điều tra hoặc giải đố vì lý do nào?": "Why have you ever quit an investigation or puzzle game?", "Không hiểu cách liên kết các manh mối": "I didn’t understand how to connect the clues", "Bị tụt lại, không theo kịp nhóm": "I fell behind and could not keep up with the group", "Bị kẹt quá lâu mà không có đầu mối nào": "I was stuck too long with no leads", "Phải đọc quá nhiều chữ": "Too much reading", "Không đủ thời gian chơi hết": "Not enough time to finish", "Tình tiết lặp lại, nhàm chán": "Repetitive, boring plot", "Bạn bè bỏ nên tôi bỏ theo": "My friends quit, so I quit too", "Tôi chưa từng bỏ dở game nào loại này": "I’ve never quit a game like this", "Tôi chưa chơi game điều tra hoặc giải đố": "I haven’t played investigation or puzzle games", "Nếu không dùng mic, bạn muốn trao đổi với đồng đội bằng cách nào?": "Without voice chat, how would you prefer to communicate with teammates?", "Chat chữ trong game": "In-game text chat", "Đánh dấu vị trí, vật thể (ping)": "Pinging locations and objects", "Câu nói hoặc biểu cảm có sẵn": "Preset phrases or emotes", "Ghim chứng cứ lên bảng chung": "Pinning evidence to a shared board", "Dùng Discord": "Using Discord", "Dùng Messenger hoặc các ứng dụng khác": "Using Messenger or other apps", "Khi chọn một game trinh thám hoặc giải đố, những yếu tố sau quan trọng với bạn đến mức nào?": "When choosing a detective or puzzle game, how important are the following to you?", "Không quan trọng": "Not important", "Rất quan trọng": "Very important", "Cốt truyện logic, chứng cứ khớp với nhau": "A logical story where the evidence fits together", "Có tình tiết bất ngờ, đảo ngược": "Surprising twists", "Độ khó công bằng, không phải đoán mò": "Fair difficulty, no guesswork", "Mỗi người có vai trò và thông tin riêng": "Each player has their own role and information", "Mỗi người tự chơi phần của mình, không ai cần thông tin của ai.": "Each person plays their own part; nobody needs anyone else’s information.", "Có yếu tố hài hước, đối đáp dí dỏm": "Humor and witty dialogue", "Trong 12 tháng qua, bạn đã trả tiền cho những gì?": "In the past 12 months, what have you paid for?", "Game trên PC hoặc console": "Games on PC or console", "Game hoặc vật phẩm trên điện thoại": "Mobile games or in-game items", "Escape room hoặc quán board game": "Escape rooms or board game cafés", "Chưa trả cho mục nào": "I haven’t paid for any of these", "Lần gần nhất nhóm bạn cần trả tiền cho một game, một phòng chơi hoặc một gói nội dung để chơi cùng nhau, việc trả tiền diễn ra thế nào?": "The last time your group needed to pay for a game, a room or a content pack to play together, how was it paid?", "Mỗi người mua bản của mình": "Everyone bought their own copy", "Một người trả trước cho cả nhóm, sau đó chia lại": "One person paid for everyone, then we split it", "Một người trả cho cả nhóm, không chia lại": "One person paid for everyone, no splitting", "Game miễn phí, không ai phải trả": "It was free, nobody paid", "Chưa từng trả tiền để chơi chung": "We’ve never paid to play together", "Với một game phá án chơi nhóm, bạn thích cách trả nào nhất?": "For a group detective game, which payment model do you prefer?", "Mua một lần toàn bộ game": "Buy the whole game once", "Mua từng vụ án riêng lẻ": "Buy individual cases", "Mua gói nhiều vụ án giá thấp hơn": "Buy a bundle of cases at a lower price", "Miễn phí, trả cho nội dung thêm": "Free, pay for extra content", "Một người mua, cả nhóm chơi": "One person buys, the whole group plays", "Mỗi người tự trả phần của mình": "Everyone pays for themselves", "Với một game của studio chưa nổi tiếng, điều gì khiến bạn sẵn sàng trả tiền?": "For a game from a little-known studio, what makes you willing to pay?", "Có bản chơi thử miễn phí": "A free demo", "Đánh giá tốt trên Steam hoặc cộng đồng": "Good reviews on Steam or in the community", "Bạn bè đã chơi và giới thiệu": "Friends played it and recommended it", "Streamer hoặc TikToker tôi theo dõi đã chơi": "A streamer or TikToker I follow played it", "Giá thấp": "A low price", "Được hoàn tiền nếu không thích": "A refund if I don’t like it", "Tôi không trả tiền cho game của studio chưa nổi tiếng": "I don’t pay for games from little-known studios", "Tôi hay thử một game mới khi bạn bè rủ.": "I often try a new game when friends invite me.", "Dù được bạn bè rủ, tôi vẫn cần chơi thử miễn phí trước khi bỏ tiền.": "Even if friends invite me, I need a free trial before I pay.", "Tôi muốn một người mua là cả nhóm chơi được, thay vì ai cũng phải mua.": "I want one purchase to cover the whole group instead of everyone buying.", "Nếu phải mua gợi ý khi bị kẹt giữa chừng, tôi sẽ bớt muốn mua game đó.": "If I had to pay for hints when stuck, I would be less likely to buy the game.", "Nếu phải trả thêm tiền để mở một số chứng cứ, tôi sẽ bớt muốn mua game đó.": "If I had to pay extra to unlock some evidence, I would be less likely to buy the game.", "Nếu game có nạp coin (tiền ảo trong game, ví dụ Quân Huy của Liên Quân, Robux của Roblox), tôi sẽ bớt muốn mua game đó.": "If the game had in-game currency top-ups (e.g. V-Bucks in Fortnite, Robux in Roblox), I would be less likely to buy it.", "Bạn sẵn sàng trả tiền đến mức nào trong từng trường hợp sau?": "How willing would you be to pay in each of these situations?", "Chắc chắn không trả": "Definitely would not pay", "Chắc chắn trả": "Definitely would pay", "Trả tiền để chơi một vụ án mới, sau khi đã thích vụ án đầu tiên": "Paying for a new case after enjoying the first one", "Trả tiền để chơi lại vụ án cũ với một kết thúc khác": "Paying to replay a case with a different ending", "Khi xem trailer của một game chơi nhóm, điều gì khiến bạn muốn thử nhất?": "When watching a trailer for a group game, what makes you most want to try it?", "Cảnh cả nhóm phối hợp với nhau": "Scenes of the group working together", "Cốt truyện, bí ẩn của vụ án": "The story and mystery of the case", "Đồ họa, không khí": "Graphics and atmosphere", "Nhân vật": "The characters", "Khoảnh khắc hài hước hoặc bất ngờ": "Funny or surprising moments", "Bạn đồng ý đến đâu với câu: “Tôi ngại tìm hiểu trước về một game trinh thám vì sợ bị tiết lộ nội dung.”": "How much do you agree: “I avoid looking up a detective game in advance because I’m afraid of spoilers.”", "Bạn thường biết đến game mới qua kênh nào?": "How do you usually hear about new games?", "Bạn bè rủ hoặc giới thiệu": "Friends invite me or recommend them", "TikTok": "TikTok", "YouTube": "YouTube", "Facebook, nhóm cộng đồng game": "Facebook, gaming community groups", "Steam (gợi ý, trang chủ, sale)": "Steam (recommendations, front page, sales)", "Streamer trên Twitch hoặc Facebook Gaming": "Streamers on Twitch or Facebook Gaming", "Tôi xem review hoặc gameplay trước khi tải hoặc mua.": "I watch reviews or gameplay before downloading or buying.", "Giới thiệu": "Introduction", "Đọc trước khi trả lời": "Read before answering", "Video minh họa ý tưởng, chưa phải hình ảnh thực tế trong game.": "Concept video for illustration only, not actual in-game footage.", "Bản thiết kế chip AI tối mật của tập đoàn Nexora bị rò rỉ. Nghi phạm duy nhất là Elena, người yêu của CEO. Hội đồng không muốn đoán mò, nên họ thuê các bạn.": "The top-secret AI chip design of the Nexora corporation has been leaked. The only suspect is Elena, the CEO’s girlfriend. The board doesn’t want to guess, so they hire you.", "Chơi co-op online, 2 đến 4 người. Mỗi người giữ một chuyên môn: lý lịch, nhân chứng hoặc hồ sơ doanh nghiệp. Cả nhóm tới quê Elena ở Hàng Châu, lục căn hộ của cô, rồi ghép manh mối thành dòng thời gian trên bảng chung.": "Online co-op for 2 to 4 players. Each player holds one specialty: background checks, witnesses or corporate records. The group travels to Elena’s hometown of Hangzhou, searches her apartment, and pieces the clues into a timeline on a shared board.", "Cuối vụ án, cả nhóm bỏ phiếu SPY hay NOT SPY. Mỗi lần chơi, sự thật có thể khác.": "At the end of the case, the group votes SPY or NOT SPY. Each time you play, the truth may be different.", "Tôi đã đọc xong": "I’ve finished reading", "Với một vụ án như trên, một người mua cho cả phòng tối đa 4 người, mức giá nào là…": "For a case like this, bought by one person for a room of up to 4 players, what price would be…", "…rẻ đến mức bạn nghi ngờ chất lượng?": "…so cheap that you would doubt its quality?", "…rẻ, đáng tiền?": "…a bargain, good value?", "…bắt đầu thấy đắt nhưng vẫn cân nhắc?": "…getting expensive, but still worth considering?", "…quá đắt, chắc chắn không mua?": "…too expensive, you would definitely not buy?", "Sau khi xem giới thiệu, bạn muốn chơi thử Casery cùng bạn bè đến mức nào?": "After seeing the introduction, how much would you like to try Casery with friends?", "Hoàn toàn không muốn": "Not at all", "Rất muốn": "Very much", "Điều gì khiến bạn muốn hoặc ngại thử Casery?": "What makes you want to try Casery, or hesitate to?", "Nếu muốn nhận lời mời chơi thử, hãy để lại email hoặc Discord.": "If you would like an invitation to playtest, leave your email or Discord.", "Đang niêm phong hồ sơ…": "Sealing your file…", "Bạn giữ trang này mở trong vài giây.": "Please keep this page open for a few seconds.", "Đang phân tích hồ sơ của bạn…": "Analyzing your file…", "Đối chiếu manh mối…": "Cross-checking clues…", "Phân tích thói quen chơi…": "Analyzing play habits…", "Xác định mật danh…": "Assigning your code name…", "Chưa gửi được": "Not sent yet", "Kết nối bị gián đoạn": "Connection interrupted", "Câu trả lời của bạn vẫn được giữ trên thiết bị này. Bạn kiểm tra mạng rồi thử lại.": "Your answers are still saved on this device. Please check your connection and try again.", "<div class=\"end\"><h2>Cảm ơn bạn</h2><p>Bạn đã chọn không tham gia. Không có câu trả lời nào được lưu.</p><div class=\"share\"><button class=\"ghost\" id=\"again\">Quay lại trang đầu</button></div></div>": "<div class=\"end\"><h2>Thank you</h2><p>You chose not to take part. No answers were saved.</p><div class=\"share\"><button class=\"ghost\" id=\"again\">Back to the start</button></div></div>", "<div class=\"end\"><div class=\"stamp\">Cảm ơn</div><h2>Khảo sát dành cho người chơi game</h2><p>Lần này nhóm cần ý kiến của người đã chơi game trong 3 tháng gần đây. Cảm ơn bạn đã dành thời gian.</p></div>": "<div class=\"end\"><div class=\"stamp\">Thank you</div><h2>This survey is for gamers</h2><p>This time we need input from people who have played games in the past 3 months. Thank you for your time.</p></div>", "Cảm ơn bạn": "Thank you", "Cảm ơn": "Thank you", "Quay lại trang đầu": "Back to the start", "Đã ghi nhận": "Recorded", "Cảm ơn bạn đã hoàn thành hồ sơ": "Thanks for completing your file", "Câu trả lời của bạn giúp nhóm hiểu người chơi thật sự cần gì khi chơi cùng bạn bè.": "Your answers help us understand what players really need when playing with friends.", "Mật danh của bạn": "Your code name", "Giờ chơi nhóm": "Group play time", "Thể loại": "Genres", "Nhóm chơi": "Play group", "Buổi tối ngày thường": "Weekday evenings", "Sao chép link khảo sát để gửi bạn bè": "Copy the survey link to share with friends", "Đã sao chép.": "Copied.", "Người khởi xướng": "The Instigator", "Bạn thường là người rủ cả nhóm và chọn game.": "You’re usually the one who rallies the group and picks the game.", "Người mê bí ẩn": "The Mystery Buff", "Bạn tìm đến các trò suy luận cả trên màn hình lẫn ngoài đời.": "You seek out deduction games both on screen and in real life.", "Người chơi vì bạn bè": "The Loyal Teammate", "Với bạn, chơi cùng ai quan trọng hơn chơi game gì.": "For you, who you play with matters more than what you play.", "Người thích thử thách": "The Challenger", "Bạn chơi để giải được bài khó.": "You play to crack the hard problems.", "Người đi tìm câu chuyện": "The Story Seeker", "Bạn chơi để biết chuyện gì xảy ra tiếp theo.": "You play to find out what happens next.", "Người chơi tự do": "The Free Spirit", "Bạn chơi theo cách của mình, không theo khuôn nào.": "You play your own way, no templates.", "Việt Nam": "Vietnam", "Đông Nam Á (ngoài Việt Nam)": "Southeast Asia (outside Vietnam)", "Đông Á": "East Asia", "Nam Á": "South Asia", "Châu Âu": "Europe", "Bắc Mỹ": "North America", "Mỹ Latinh": "Latin America", "Châu Đại Dương": "Oceania", "Trung Đông, châu Phi": "Middle East, Africa", "Dưới 20 USD": "Under $20", "20–40 USD": "$20–40", "41–80 USD": "$41–80", "81–200 USD": "$81–200", "Trên 200 USD": "Over $200"};
+const L=s=>(typeof s==='string'&&LBL[s]!=null)?LBL[s]:s;
+Q.find(q=>q.id==='q4').opts=["Việt Nam", "Đông Nam Á (ngoài Việt Nam)", "Đông Á", "Nam Á", "Châu Âu", "Bắc Mỹ", "Mỹ Latinh", "Châu Đại Dương", "Trung Đông, châu Phi"];
+Q.find(q=>q.id==='q6').opts=["Dưới 20 USD", "20–40 USD", "41–80 USD", "81–200 USD", "Trên 200 USD"];
+for(const q of Q){q.text=L(q.text);if(q.rows)q.rows=q.rows.map(([i,t])=>[i,L(t)]);if(q.ends)q.ends=q.ends.map(L);if(q.fields)q.fields=q.fields.map(([i,t])=>[i,L(t)]);}
+CHAPTERS.forEach(c=>{if(c){c.t=L(c.t);c.d=L(c.d);c.k=L(c.k);}});
+const BY = Object.fromEntries(Q.map(q=>[q.id,q]));
+const TOTAL_Q = Q.filter(q=>q.type!=='concept').length;
+
+/* ====== TRẠNG THÁI ====== */
+const KEY='casery_survey_'+CONFIG.version;
+let S = {answers:{}, cur:'intro', started:null, rid:null, priceWarned:false};
+const store = {
+  get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+  del(k){try{localStorage.removeItem(k)}catch(e){}}
+};
+const save=()=>store.set(KEY,S);
+const A=()=>S.answers;
+const uid=()=> (crypto.randomUUID ? crypto.randomUUID() : 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,10));
+const optVal=o=>typeof o==='string'?o:o.v;
+const optsOf=q=>q.dyn?q.dyn(A()):q.opts;
+const isVisible=q=>!q.when||q.when(A());
+
+function stepList(){
+  const out=[]; let sec=0;
+  for(const q of Q){
+    if(!isVisible(q)) continue;
+    if(q.sec!==sec){ sec=q.sec; if(sec>1) out.push('ch'+sec); }
+    out.push(q.id);
+  }
+  return out;
+}
+function secOf(key){ if(key.startsWith('ch')) return +key.slice(2); return BY[key]?BY[key].sec:0; }
+
+function isAnswered(q){
+  const v=A()[q.id];
+  switch(q.type){
+    case 'single': return !!v;
+    case 'multi': return Array.isArray(v)&&v.length>0;
+    case 'scale': return typeof v==='number';
+    case 'grid': return q.rows.every(r=>v&&v[r[0]]!=null);
+    case 'numbers': return q.fields.every(f=>v&&+v[f[0]]>0);
+    case 'text': return q.optional || !!(v&&v.trim());
+    case 'concept': return true;
+  }
+  return false;
+}
+
+/* ====== GIAO DIỆN ====== */
+const app=document.getElementById('app');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CLIP='<svg class="clip" viewBox="0 0 22 54" aria-hidden="true"><path d="M7 40V9a4 4 0 0 1 8 0v34a6 6 0 0 1-12 0V12" fill="none" stroke="#8a8f94" stroke-width="2.4" stroke-linecap="round"/></svg>';
+let dir='enter';
+let quiet=false;
+const INK='<svg class="ink" viewBox="0 0 40 40" preserveAspectRatio="none" aria-hidden="true"><path pathLength="100" d="M22 4C32 4 37 12 36 21C35 31 27 37 18 36C9 35 3 28 4 18C5 10 12 4 25 6"/></svg>';
+const RIM='<i class="rim" aria-hidden="true"></i>';
+const BUDDY_SVG='<svg viewBox="0 0 60 70"><path d="M30 18C44 18 50 30 49 45C48 59 40 66 30 66C20 66 12 59 11 45C10 30 16 18 30 18Z" fill="#fffaf2" stroke="#1f1612" stroke-width="2.6"/><path d="M22 66l-2 4M38 66l2 4" stroke="#1f1612" stroke-width="2.6" stroke-linecap="round"/><path d="M18 19C18 8 22 5 30 5C38 5 42 8 42 19Z" fill="#8f1d14" stroke="#1f1612" stroke-width="2.4" stroke-linejoin="round"/><path d="M19 15h22" stroke="#1f1612" stroke-width="2"/><path d="M9 20Q30 12 51 20Q30 26 9 20Z" fill="#8f1d14" stroke="#1f1612" stroke-width="2.4" stroke-linejoin="round"/><g class="eyes"><circle cx="24" cy="33" r="4.6" fill="#fff" stroke="#1f1612" stroke-width="1.8"/><circle cx="36" cy="33" r="4.6" fill="#fff" stroke="#1f1612" stroke-width="1.8"/><circle class="pupil" cx="24" cy="33" r="2.2" fill="#1f1612"/><circle class="pupil" cx="36" cy="33" r="2.2" fill="#1f1612"/></g><path d="M27 43q3 2.5 6 0" stroke="#1f1612" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M47 47l6-6" stroke="#1f1612" stroke-width="2.6" stroke-linecap="round"/><circle cx="56" cy="37" r="6" fill="rgba(200,225,255,.55)" stroke="#1f1612" stroke-width="2.4"/></svg>';
+const BUDDY='<div class="buddy" aria-hidden="true">'+BUDDY_SVG+'<div class="bubble"></div></div>';
+const PIN='<svg class="pin" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11" fill="#c9a55a" stroke="#6e4f1c" stroke-width="1.5"/><circle cx="11.5" cy="11" r="3.5" fill="#fff3c8" opacity=".85"/></svg>';
+function tornEdge(){
+  const j=()=>(Math.random()*2.8).toFixed(1)+'px', N=26, p=[];
+  for(let i=0;i<=N;i++) p.push(`${(i/N*100).toFixed(2)}% ${j()}`);
+  for(let i=1;i<=N;i++) p.push(`calc(100% - ${j()}) ${(i/N*100).toFixed(2)}%`);
+  for(let i=N-1;i>=0;i--) p.push(`${(i/N*100).toFixed(2)}% calc(100% - ${j()})`);
+  for(let i=N-1;i>0;i--) p.push(`${j()} ${(i/N*100).toFixed(2)}%`);
+  return `polygon(${p.join(',')})`;
+}
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let lastClues=null, endRevealed=false;
+const clueCount=()=>Q.filter(q=>q.type!=='concept'&&isVisible(q)&&A()[q.id]!=null&&isAnswered(q)).length;
+function popEl(el){ if(!el) return; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+function buzz(){ try{ navigator.vibrate&&navigator.vibrate(8); }catch(e){} }
+function typewrite(el,text){
+  const t=el.querySelector('.t'); if(!t) return;
+  if(RM){ t.textContent=text; return; }
+  let i=0;
+  const tick=()=>{ if(!t.isConnected) return; t.textContent=text.slice(0,++i); SND.play('key',text[i-1]===' '); if(i<text.length) setTimeout(tick, 38+(text[i-1]===' '?50:0)+(text[i-1]===','?160:0)); };
+  setTimeout(tick,450);
+}
+const SND=(()=>{
+  let ctx=null, master=null, noiseBuf=null;
+  let on=store.get('casery_sound'); if(on===null) on=true;
+  function init(){
+    if(ctx){ if(ctx.state==='suspended') ctx.resume(); return; }
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    ctx=new AC(); master=ctx.createGain(); master.gain.value=.6; master.connect(ctx.destination);
+    const len=ctx.sampleRate*2; noiseBuf=ctx.createBuffer(1,len,ctx.sampleRate);
+    const d=noiseBuf.getChannelData(0); for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+  }
+  function env(g,t0,attack,dur,peak){ g.gain.setValueAtTime(.0001,t0); g.gain.exponentialRampToValueAtTime(peak,t0+attack); g.gain.exponentialRampToValueAtTime(.0001,t0+dur); }
+  function tone({t=0,freq=440,freqEnd=0,dur=.2,type='sine',gain=.2,attack=.005}){
+    const t0=ctx.currentTime+t, o=ctx.createOscillator(), g=ctx.createGain();
+    o.type=type; o.frequency.setValueAtTime(freq,t0); if(freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd,t0+dur);
+    env(g,t0,attack,dur,gain); o.connect(g); g.connect(master); o.start(t0); o.stop(t0+dur+.05);
+  }
+  function noise({t=0,dur=.2,type='bandpass',freq=2000,freqEnd=0,q=1,gain=.2,attack=.01}){
+    const t0=ctx.currentTime+t, s=ctx.createBufferSource(), f=ctx.createBiquadFilter(), g=ctx.createGain();
+    s.buffer=noiseBuf; f.type=type; f.frequency.setValueAtTime(freq,t0); if(freqEnd) f.frequency.exponentialRampToValueAtTime(freqEnd,t0+dur); f.Q.value=q;
+    env(g,t0,attack,dur,gain); s.connect(f); f.connect(g); g.connect(master); s.start(t0,Math.random()*1.5); s.stop(t0+dur+.05);
+  }
+  function pencil(t,dur,n,level){
+    const p=.9+Math.random()*.2;
+    // lớp chính: hạt dài, dải tần thấp hơn, nhịp chậm - nhanh - chậm, chồng lên nhau cho liền mạch
+    for(let i=0;i<n;i++){
+      const ph=n>1?i/(n-1):.5, speed=Math.sin(Math.PI*ph);
+      noise({t:t+i*dur/n+Math.random()*.008, dur:.045+Math.random()*.03, freq:(2100+1500*speed)*p*(.8+Math.random()*.4), q:.9,
+             gain:(.018+.04*speed)*level*(.6+Math.random()*.8), attack:.014});
+    }
+    // lớp sột soạt: những hạt rất ngắn rải ngẫu nhiên, như thớ giấy cọ vào than chì
+    for(let j=0;j<n;j++){
+      const ph=Math.random(), speed=Math.sin(Math.PI*ph);
+      noise({t:t+ph*dur, dur:.008+Math.random()*.012, type:'highpass', freq:3800+Math.random()*2200, gain:(.006+.014*speed)*level*(.5+Math.random()), attack:.002});
+    }
+    // lớp nền: tiếng giấy trên mặt bàn
+    noise({t, dur:dur+.05, type:'lowpass', freq:600, gain:.02*level, attack:Math.min(.08,dur/2)});
+  }
+  const FX={
+    // bút đỏ khoanh tròn: vài nét cào ngắn
+    // bút chì khoanh tròn: nhiều hạt sột soạt của than chì trên thớ giấy, chậm - nhanh - chậm theo vòng tay
+    pen(){ pencil(0,.6,30,1); },
+    // bút đánh dấu ✓: hai nét
+    // bút chì đánh dấu ✓: nét ngắn đi xuống, ngắt một chút, nét dài vút lên
+    tick(){ pencil(0,.13,8,.85); pencil(.17,.26,14,1); },
+    // lật giấy
+    rustle(soft){ const g=soft?.05:.1; noise({dur:.3,type:'highpass',freq:1600,q:.6,gain:g,attack:.04}); noise({t:.06,dur:.24,freq:4200,q:1,gain:g*.7,attack:.03}); },
+    whoosh(){ noise({dur:.5,freq:500,freqEnd:2200,q:.7,gain:.08,attack:.2}); },
+    // đinh ghim cắm vào poster
+    pin(){ tone({freq:240,freqEnd:90,dur:.12,type:'triangle',gain:.16}); noise({dur:.04,freq:3200,q:1,gain:.07,attack:.002}); },
+    // sáp niêm phong nứt vỡ
+    crack(){ noise({dur:.035,type:'highpass',freq:2400,gain:.32,attack:.001}); noise({t:.03,dur:.06,freq:1300,q:2,gain:.22,attack:.001}); tone({freq:170,freqEnd:60,dur:.16,gain:.18,attack:.002});
+             for(let i=0;i<6;i++) noise({t:.2+i*.045+Math.random()*.03,dur:.02,type:'highpass',freq:4200,gain:.05,attack:.001}); },
+    // đóng dấu
+    stamp(){ tone({freq:115,freqEnd:42,dur:.24,gain:.42,attack:.002}); noise({dur:.09,type:'lowpass',freq:900,gain:.3,attack:.001}); },
+    beep(){ tone({freq:1320,dur:.07,type:'square',gain:.03}); },
+    chime(){ [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone({t:.09*i,freq:f,dur:.8,type:'triangle',gain:.08})); },
+    // phím bàn phím: tiếng tách + tiếng cộc trầm, phím cách trầm hơn
+    key(space){ const p=.88+Math.random()*.28; noise({dur:.022,type:'highpass',freq:3200*p,gain:.11,attack:.001}); noise({t:.004,dur:.04,freq:1300*p,q:1.4,gain:.08,attack:.001}); tone({freq:(space?105:175)*p,freqEnd:(space?65:110)*p,dur:space?.075:.045,type:'triangle',gain:space?.13:.085,attack:.001}); },
+    // bút viết lên giấy
+    write(){ pencil(0,.1+Math.random()*.06,6,.7); },
+    // tẩy
+    erase(){ noise({dur:.13,freq:850,q:.8,gain:.05,attack:.025}); noise({t:.05,dur:.1,freq:1300,q:.8,gain:.035,attack:.02}); },
+    nope(){ tone({freq:220,dur:.09,type:'square',gain:.035}); tone({t:.11,freq:175,dur:.13,type:'square',gain:.035}); }
+  };
+  return {
+    play(name,arg,delay=0){ if(!on||!ctx) return; const run=()=>{ try{ FX[name](arg); }catch(e){ (window.__sndErr=window.__sndErr||[]).push(name+': '+e.message); } }; delay?setTimeout(run,delay):run(); },
+    unlock(){ if(on) init(); },
+    get on(){ return on; },
+    toggle(){ on=!on; store.set('casery_sound',on); if(on){ init(); FX.tick(); } return on; }
+  };
+})();
+window.SND=SND;
+const BUB_NEW=['hmm…','this one!','take your time','oh?','think it over'];
+const BUB_PICK=['ok!','noted!','aha','got it','noted','nice'];
+let bubTimer=null;
+function say(list,chance=1){
+  if(Math.random()>chance) return;
+  const b=app.querySelector('.card:not(.leaving) .bubble'); if(!b) return;
+  b.textContent=list[Math.floor(Math.random()*list.length)];
+  b.classList.remove('show'); void b.offsetWidth; b.classList.add('show');
+  clearTimeout(bubTimer); bubTimer=setTimeout(()=>b.classList.remove('show'),1400);
+}
+function look(x,y){
+  document.querySelectorAll('.card:not(.leaving) .buddy, .gbuddy').forEach(bd=>{
+    const r=bd.getBoundingClientRect(), cx=r.left+r.width*.5, cy=r.top+r.height*.47;
+    const dx=x-cx, dy=y-cy, d=Math.hypot(dx,dy)||1, k=Math.min(1,d/120)*2;
+    bd.style.setProperty('--px',(dx/d*k).toFixed(2)+'px'); bd.style.setProperty('--py',(dy/d*k).toFixed(2)+'px');
+  });
+}
+const SPK_ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h3l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9c1.3 1.6 1.3 4.4 0 6M18.8 6.5c2.8 3 2.8 8 0 11"/></svg>';
+const SPK_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h3l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>';
+function updSnd(){
+  const b=document.getElementById('snd'); if(b){ b.innerHTML=SND.on?SPK_ON:SPK_OFF; b.setAttribute('aria-label',SND.on?'Turn sound off':'Turn sound on'); b.title=b.getAttribute('aria-label'); }
+  const t=document.getElementById('snd2'); if(t) t.innerHTML=(SND.on?SPK_ON:SPK_OFF)+(SND.on?'Sound: on':'Sound: off');
+}
+function confetti(){
+  if(RM) return;
+  const C=['#ecdfc2','#b3261e','#C9A55A','#F3E6CC','#7e1d14'];
+  for(let i=0;i<70;i++){
+    const d=document.createElement('i'); d.className='confetti';
+    d.style.left=Math.random()*100+'vw'; d.style.background=C[i%C.length];
+    d.style.setProperty('--dx',(Math.random()*160-80)+'px'); d.style.setProperty('--r',(Math.random()*900-450)+'deg');
+    d.style.animationDuration=(2.2+Math.random()*1.8)+'s'; d.style.animationDelay=(Math.random()*.5)+'s';
+    const q=()=>Math.round(Math.random()*30)+'%'; d.style.clipPath=`polygon(${q()} 0,100% ${q()},${100-Math.random()*30}% 100%,0 ${70+Math.random()*30}%)`;
+    document.body.appendChild(d); setTimeout(()=>d.remove(),5000);
+  }
+}
+const FINGER='<svg viewBox="0 0 48 48" fill="none" stroke="#861010" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M14 16a13 13 0 0 1 20 0"/><path d="M9 25a15 15 0 0 1 30-3"/><path d="M15 38c-2-4-3-8-2-12a11 11 0 0 1 22 0c0 4 0 7-1 10"/><path d="M20 41c-2-5-2-10-1-14a5 5 0 0 1 10 0c0 5 0 9-2 13"/><path d="M24 27c0 5 0 10-1 14"/></svg>';
+
+function setTop(){
+  const top=document.getElementById('top');
+  const k=S.cur;
+  const inSurvey = k!=='intro' && !k.startsWith('end');
+  top.hidden=!inSurvey && !(k==='end-done');
+  const track=document.getElementById('track');
+  const sec = k==='end-done'?10:secOf(k);
+  track.querySelectorAll('.dot').forEach(d=>d.remove());
+  for(let i=1;i<=9;i++){
+    const d=document.createElement('div'); d.className='dot'+(i<sec?' done':'')+(i===sec?' cur':'')+(k.startsWith('ch')&&i===sec-1?' justdone':''); d.textContent=i<sec?'✓':i; track.appendChild(d);
+  }
+  const cc=clueCount(), ce=document.getElementById('clues');
+  if(lastClues!=null && cc>lastClues && !top.hidden){ ce.classList.remove('bump'); void ce.offsetWidth; ce.classList.add('bump'); }
+  lastClues=cc; document.getElementById('cluesN').textContent=cc;
+  document.getElementById('fill').style.width = (Math.min(sec-1,8)/8*100)+'%';
+  const list=stepList();
+  const idx=list.indexOf(k);
+  const pct = k==='end-done'?100: Math.round(Math.max(0,idx)/list.length*100);
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('chapname').textContent = sec>=1&&sec<=9 ? 'Chapter '+sec+' · '+CHAPTERS[sec].t : '';
+}
+
+function render(){
+  setTop();
+  const k=S.cur;
+  document.body.classList.toggle('centered', k==='intro'||k.startsWith('end-'));
+  if(k==='intro') return renderIntro();
+  if(k.startsWith('end-')) return renderEnd(k.slice(4));
+  if(k.startsWith('ch')) return renderChapter(+k.slice(2));
+  const q=BY[k];
+  if(q.type==='concept') return renderConcept(q);
+  renderQuestion(q);
+}
+
+function shell(inner, cls=''){
+  const poster = cls.includes('poster');
+  const deco = poster ? PIN+RIM : CLIP+RIM+BUDDY;
+  const old = app.querySelector('.card:not(.leaving)');
+  if(quiet && old){ old.classList.remove('enter','enter-back','reveal','swap','drop'); old.innerHTML = deco+inner; return; }
+  app.querySelectorAll('.leaving').forEach(e=>e.remove());
+  // Trong cùng một chương: giữ nguyên tờ giấy, chỉ viết nội dung mới lên
+  if(old && cls.includes('qcard') && old.classList.contains('qcard')){
+    old.className=`card ${cls}`; void old.offsetWidth; old.classList.add('swap');
+    old.innerHTML=deco+inner;
+    SND.play('rustle',true);
+    dir='enter';
+    window.scrollTo({top:0,behavior:'instant'in window?'instant':'auto'});
+    return;
+  }
+  const oldCover = old && (old.classList.contains('poster') || old.querySelector('.cover'));
+  const card=document.createElement('section');
+  const anim = !old ? 'enter' : (poster && dir==='enter') ? 'drop' : (oldCover||dir==='enter-back') ? 'reveal' : 'enter';
+  card.className=`card ${cls} ${anim}`;
+  const r=(a,b)=>(a+Math.random()*(b-a)).toFixed(2);
+  card.style.setProperty('--tilt',r(-.7,.7)+'deg');
+  card.style.setProperty('--rx',r(12,88)+'%');
+  card.style.setProperty('--ry',(Math.random()<.5?r(6,16):r(82,94))+'%');
+  card.style.setProperty('--edge',tornEdge());
+  card.innerHTML=deco+inner;
+  if(old && !RM){
+    old.classList.remove('enter','enter-back','drop','reveal','swap');
+    const rc=old.getBoundingClientRect();
+    Object.assign(old.style,{top:rc.top+'px',left:rc.left+'px',width:rc.width+'px'});
+    old.classList.add('leaving', oldCover && !poster ? 'out-up' : 'out-fade');
+    if(anim==='drop'){ SND.play('whoosh'); SND.play('pin',null,330); } else if(oldCover){ SND.play('rustle'); SND.play('whoosh'); } else SND.play('rustle',true);
+    old.setAttribute('inert','');
+    old.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));
+    app.insertBefore(card, old);
+    setTimeout(()=>old.remove(),700);
+  } else { app.innerHTML=''; app.appendChild(card); }
+  dir='enter';
+  window.scrollTo({top:0,behavior:'instant'in window?'instant':'auto'});
+}
+
+function renderIntro(){
+  const saved=store.get(KEY);
+  const done=store.get(KEY+'_done');
+  const resume = saved && saved.cur && saved.cur!=='intro' && !saved.cur.startsWith('end');
+  const H1='How do you play games with friends?';
+  shell(`
+    <div class="tab">Case #001</div>
+    <div class="secret" aria-hidden="true">SECRET</div>
+    <div class="cover">
+      <div class="file">Gamer survey</div>
+      <h1 class="tw"><span class="sr">${H1}</span><span class="ghost-t" aria-hidden="true">${H1}</span><span class="typed" aria-hidden="true"><span class="t"></span><span class="caret"></span></span></h1>
+      <p class="in" style="--d:.5s">Hi! We’re a student team at UEH (University of Economics Ho Chi Minh City) working on a course project about playing games with friends.</p>
+      <p class="in" style="--d:.65s">There are no right or wrong answers, so please answer from your own experience. Responses are anonymous and used for academic purposes only.</p>
+      <div class="meta in" style="--d:.8s"><span>9 chapters</span><span>About 12–15 minutes</span><span>Anonymous</span><button class="sndtxt" id="snd2" type="button"></button></div>
+      <div class="reward in" style="--d:.95s"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="7" width="26" height="18" rx="3" fill="#1C3E33"/><circle cx="11" cy="16" r="4" fill="#C9A55A"/><rect x="17" y="12" width="9" height="2.4" rx="1" fill="#F6E9CE"/><rect x="17" y="17" width="6" height="2.4" rx="1" fill="#F6E9CE"/></svg><span>Finish the file to unlock <b>Investigator ID card</b> with your own code name.</span></div>
+      ${done?'<p class="small">You have already submitted this survey on this device. Thank you.</p>':''}
+      <div class="nav in" style="--d:1.1s;justify-content:${resume?'space-between':'flex-end'}">
+        ${resume?'<button class="back" id="restart">Start over</button>':''}
+        <button class="next pulse" id="go">${resume?'Continue the file':'Open the file'}</button>
+      </div>
+    </div>`,'');
+  typewrite(app.querySelector('.tw'),H1);
+  setTimeout(()=>say(['hello!','let’s open the file']),1300);
+  updSnd(); document.getElementById('snd2').onclick=()=>{ SND.toggle(); updSnd(); };
+  SND.play('stamp',null,2650);
+  document.getElementById('go').onclick=()=>{
+    if(resume){ S=saved; } else { S={answers:{},cur:'q1',started:null,rid:uid(),priceWarned:false}; }
+    save(); render();
+  };
+  const r=document.getElementById('restart');
+  if(r) r.onclick=()=>{ store.del(KEY); S={answers:{},cur:'q1',started:null,rid:uid(),priceWarned:false}; save(); render(); };
+}
+
+function renderChapter(n){
+  const c=CHAPTERS[n], cc=clueCount();
+  const R=['','I','II','III','IV','V','VI','VII','VIII','IX'];
+  const milestone = n===5?' · Halfway through the case':(n===9?' · Final chapter':'');
+  const seal=`<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 4C58 8 64 3 70 9C77 12 80 18 88 22C92 30 97 36 95 45C98 53 94 60 96 67C92 75 86 79 82 86C74 90 68 96 58 95C50 99 43 95 35 96C27 92 20 89 15 82C9 76 4 70 5 61C2 53 6 46 3 38C7 30 11 23 17 17C23 10 31 9 38 5C43 3 46 6 50 4Z" fill="url(#wax)"/><circle cx="50" cy="50" r="30" fill="none" stroke="#5e0f09" stroke-width="3" opacity=".75"/><circle cx="49" cy="49" r="30" fill="none" stroke="#ec7a6c" stroke-width="1" opacity=".55"/><text x="50" y="${R[n].length>2?59:61}" text-anchor="middle" font-family="Grandstander,cursive" font-weight="900" font-size="${R[n].length>2?22:30}" fill="#5e0f09">${R[n]}</text></svg>`;
+  const toc=CHAPTERS.slice(1).map((ch,i)=>{ const k=i+1; return `<li class="${k<n?'done':k===n?'now':''}"><b>${R[k]}.</b><span>${esc(ch.t)}${k===n?INK:''}</span></li>`; }).join('');
+  shell(`
+    <div class="chapter">
+      <div class="kick">Survey case file · Chapter ${n}/9</div>
+      <h2 class="ptitle"><span class="redact">${esc(c.k)}</span></h2>
+      <div class="psub in" style="--d:1.25s">${esc(c.t)}</div>
+      <p class="pdesc in" style="--d:1.4s">${esc(c.d)}</p>
+      <ol class="toc in" style="--d:.6s">${toc}</ol>
+      <div class="pfoot in" style="--d:1.5s"><span>Collected ${cc} clues${milestone}</span><span class="no">No. ${String(n).padStart(3,'0')}</span></div>
+      <div class="nav in" style="--d:1s"><button class="seal" id="nx" aria-label="Break the seal to enter chapter ${n}"><span class="half l">${seal}</span><span class="half r">${seal}</span></button><div class="seal-hint">Tap the seal to open the chapter</div><button class="back" id="bk">Back</button></div>
+    </div>`,'poster');
+  document.getElementById('nx').onclick=e=>{ const s=e.currentTarget; if(s.classList.contains('broken')) return; s.classList.add('broken'); buzz(); SND.play('crack'); setTimeout(next, RM?0:480); };
+  document.getElementById('bk').onclick=back;
+}
+
+function renderConcept(q){
+  const u = CONFIG.trailerUrl;
+  const player = /\.mp4($|\?)/i.test(u)
+    ? `<video src="${esc(u)}" controls playsinline preload="metadata"></video>`
+    : `<iframe src="${esc(u)}" title="Trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  const video = u ? `<div class="video">${player}</div><p class="video-note">Concept video for illustration only, not actual in-game footage.</p>` : '';
+  shell(`
+    <div class="tab">Introduction</div>
+    <div class="topsecret" aria-hidden="true">TOP SECRET</div>
+    <div class="qnum">Read before answering</div>
+    ${video}
+    <div class="concept">
+      <h3>Casery</h3>
+      <p class="rd" style="--d:.7s">The top-secret AI chip design of the Nexora corporation has been leaked. The only suspect is Elena, the CEO’s girlfriend. The board doesn’t want to guess, so they hire you.</p>
+      <p class="rd" style="--d:1.2s">Online co-op for 2 to 4 players. Each player holds one specialty: background checks, witnesses or corporate records. The group travels to Elena’s hometown of Hangzhou, searches her apartment, and pieces the clues into a timeline on a shared board.</p>
+      <p class="rd" style="--d:1.7s">At the end of the case, the group votes SPY or NOT SPY. Each time you play, the truth may be different.</p>
+    </div>
+    <div class="nav"><button class="back" id="bk">Back</button><button class="next" id="nx">I’ve finished reading</button></div>`,'qcard');
+  document.getElementById('nx').onclick=next;
+  document.getElementById('bk').onclick=back;
+}
+
+function hintFor(q){
+  if(q.type==='single') return 'Choose one';
+  if(q.type==='multi') return q.max?`Choose up to ${q.max}`:'Choose all that apply';
+  if(q.type==='scale') return 'Choose a level from 1 to 5';
+  if(q.type==='grid') return q.cols?'Choose one level for each statement':'Choose a level from 1 to 5 for each statement';
+  if(q.type==='numbers') return 'Enter whole US dollars. For example, 15 means $15.';
+  if(q.type==='text') return q.optional?'Optional':'';
+  return '';
+}
+
+function renderQuestion(q){
+  const n=q.id.slice(1);
+  const a=A();
+  let body='';
+  if(q.type==='single'||q.type==='multi'){
+    const multi=q.type==='multi';
+    const opts=optsOf(q);
+    body='<div class="opts">'+opts.map((o,i)=>{
+      const v=optVal(o);
+      const sel = multi ? (a[q.id]||[]).includes(v) : a[q.id]===v;
+      const key = String.fromCharCode(65+i);
+      let html=`<button class="opt ${multi?'multi':''} ${sel?'sel':''}" style="--i:${i}" data-i="${i}" aria-pressed="${sel}"><span class="k">${sel&&multi?'✓':key}${INK}</span><span class="lbl"><span class="hl">${esc(L(v))}</span></span></button>`;
+      if(o.other&&sel) html+=`<div class="other"><input class="txt" data-other="${q.id}" placeholder="Please specify (optional)" value="${esc(a[q.id+'_khac']||'')}"></div>`;
+      return html;
+    }).join('')+'</div>';
+  } else if(q.type==='scale'){
+    body=`<div class="scale">${[1,2,3,4,5].map(v=>`<button class="sbtn ${a[q.id]===v?'sel':''}" data-v="${v}">${v}${INK}</button>`).join('')}</div>
+      <div class="ends"><span>1 = ${esc(q.ends[0])}</span><span>5 = ${esc(q.ends[1])}</span></div>`;
+  } else if(q.type==='grid'){
+    const g=a[q.id]||{};
+    const legend = q.cols?'':`<div class="glegend">1 = ${esc(q.ends[0])} · 5 = ${esc(q.ends[1])}</div>`;
+    body=legend+'<div>'+q.rows.map(([rid,txt],ri)=>{
+      const cur=g[rid];
+      const btns = q.cols
+        ? `<div class="chips">${q.cols.map((c,ci)=>`<button class="chip ${cur===c?'sel':''}" data-r="${rid}" data-c="${ci}">${esc(L(c))}${INK}</button>`).join('')}</div>`
+        : `<div class="scale">${[1,2,3,4,5].map(v=>`<button class="sbtn ${cur===v?'sel':''}" data-r="${rid}" data-v="${v}">${v}${INK}</button>`).join('')}</div>`;
+      return `<div class="grow" style="--i:${ri}" id="row-${rid}"><div class="gtext"><b>${rid}.</b>${esc(txt)}</div>${btns}</div>`;
+    }).join('')+'</div>';
+  } else if(q.type==='numbers'){
+    const v=a[q.id]||{};
+    body='<div class="nums">'+q.fields.map(([fid,txt],fi)=>`
+      <div class="nrow" style="--i:${fi}"><label for="n-${fid}"><b>${fid}.</b>${esc(txt)}</label>
+      <div class="nwrap"><input class="txt" id="n-${fid}" data-f="${fid}" inputmode="numeric" autocomplete="off" value="${esc(v[fid]||'')}"><span class="unit">USD</span><span class="vnd" id="vnd-${fid}"></span></div></div>`).join('')+'</div><div class="warn" id="pwarn" hidden></div>';
+  } else if(q.type==='text'){
+    body = q.long
+      ? `<textarea class="txt" id="t" placeholder="Write a few lines if you like">${esc(a[q.id]||'')}</textarea>`
+      : `<input class="txt" id="t" placeholder="${q.contact?'Email or Discord username':''}" value="${esc(a[q.id]||'')}">`;
+    if(q.contact) body+='<p class="small" style="margin-top:8px">This is stored separately from your survey answers.</p>';
+  }
+  const isLast = stepList().slice(-1)[0]===q.id;
+  const kbd = (q.type==='single'||q.type==='multi') ? 'Press A, B, C… to choose · Enter to continue' : (q.type==='scale'?'Press 1–5 to choose · Enter to continue':'Enter to continue');
+  shell(`
+    <div class="tab">Chapter ${q.sec}</div>
+    <div class="qnum">Question ${n}</div>
+    <h2 class="qtext">${esc(q.text)}</h2>
+    <div class="qhint" id="hint">${hintFor(q)}</div>
+    ${body}
+    <div class="nav">
+      <button class="back" id="bk" ${q.id==='q1'?'hidden':''}>Back</button>
+      <button class="next" id="nx">${isLast?'Submit file':'Next'}</button>
+    </div>
+    <div class="kbd">${kbd}</div>`,'qcard');
+  wire(q);
+  if(!quiet) setTimeout(()=>say(BUB_NEW,.25),700);
+}
+
+function refreshNext(q){ const b=document.getElementById('nx'); if(b) b.disabled=!isAnswered(q); }
+let autoTimer=null;
+function wire(q){
+  const a=A();
+  document.getElementById('bk').onclick=back;
+  document.getElementById('nx').onclick=next;
+  refreshNext(q);
+  if(q.type==='single'||q.type==='multi'){
+    app.querySelectorAll('.opt').forEach(btn=>btn.onclick=()=>pick(q,+btn.dataset.i));
+    app.querySelectorAll('[data-other]').forEach(inp=>inp.oninput=e=>{a[q.id+'_khac']=e.target.value; save();});
+  }
+  if(q.type==='scale') app.querySelectorAll('.sbtn').forEach(b=>b.onclick=()=>{a[q.id]=+b.dataset.v; save(); renderSel(q); popEl(b); buzz(); SND.play('pen'); say(BUB_PICK); autoNext(q);});
+  if(q.type==='grid'){
+    app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{
+      const g=a[q.id]=a[q.id]||{};
+      g[b.dataset.r] = q.cols ? q.cols[+b.dataset.c] : +b.dataset.v;
+      save();
+      const row=document.getElementById('row-'+b.dataset.r);
+      row.querySelectorAll('[data-r]').forEach(x=>x.classList.toggle('sel', x===b));
+      popEl(b); buzz(); SND.play('pen'); say(BUB_PICK,.5);
+      refreshNext(q);
+      const nextRow = q.rows.find(r=>g[r[0]]==null);
+      if(nextRow){ const el=document.getElementById('row-'+nextRow[0]); const r=el.getBoundingClientRect(); if(r.top>window.innerHeight*0.6) el.scrollIntoView({behavior:'smooth',block:'center'}); }
+      else autoNext(q);
+    });
+  }
+  if(q.type==='numbers'){
+    const fmt=()=>{ q.fields.forEach(([f])=>{ const v=(a[q.id]||{})[f]; document.getElementById('vnd-'+f).textContent = v>0 ? '= $'+(+v).toLocaleString('en-US') : ''; }); };
+    app.querySelectorAll('[data-f]').forEach(inp=>inp.oninput=e=>{
+      const clean=e.target.value.replace(/\D/g,'').slice(0,6); e.target.value=clean;
+      a[q.id]=a[q.id]||{}; a[q.id][e.target.dataset.f]=clean; save(); fmt(); refreshNext(q);
+      document.getElementById('pwarn').hidden=true; S.priceWarned=false;
+    });
+    fmt();
+  }
+  if(q.type==='text'){
+    const t=document.getElementById('t'); t.oninput=e=>{a[q.id]=e.target.value; save(); refreshNext(q);};
+  }
+}
+function renderSel(q){
+  if(q.type==='scale') app.querySelectorAll('.sbtn').forEach(b=>b.classList.toggle('sel',+b.dataset.v===A()[q.id]));
+  refreshNext(q);
+}
+function autoNext(q){ clearTimeout(autoTimer); autoTimer=setTimeout(()=>{ if(S.cur===q.id&&isAnswered(q)) next(); },560); }
+
+function pick(q,i){
+  const a=A(); const opts=optsOf(q); const o=opts[i]; const v=optVal(o);
+  if(q.type==='single'){
+    a[q.id]=v; if(!o.other) delete a[q.id+'_khac'];
+    save(); quiet=true; renderQuestion(q); quiet=false; app.firstElementChild.classList.remove('enter');
+    popEl(app.querySelector(`.opt[data-i="${i}"]`)); buzz(); SND.play('pen'); say(BUB_PICK);
+    if(!o.other) autoNext(q); else { const inp=app.querySelector('[data-other]'); if(inp) inp.focus(); }
+    return;
+  }
+  let arr=a[q.id]||[];
+  if(arr.includes(v)) arr=arr.filter(x=>x!==v);
+  else {
+    if(o.excl) arr=[v];
+    else {
+      arr=arr.filter(x=>{ const oo=opts.find(p=>optVal(p)===x); return !(oo&&oo.excl); });
+      if(q.max&&arr.length>=q.max){ const h=document.getElementById('hint'); h.textContent=`You can choose at most ${q.max}. Unselect one before choosing another.`; h.classList.add('flash'); SND.play('nope'); return; }
+      arr=[...arr,v];
+    }
+  }
+  a[q.id]=arr; if(!arr.includes('Khác')) delete a[q.id+'_khac'];
+  // giữ câu trả lời Q20 hợp lệ khi Q19 thay đổi
+  if(q.id==='q19' && a.q20 && !obstaclesChosen(a).includes(a.q20)) delete a.q20;
+  save(); quiet=true; renderQuestion(q); quiet=false; app.firstElementChild.classList.remove('enter');
+  if(arr.includes(v)){ popEl(app.querySelector(`.opt[data-i="${i}"]`)); buzz(); SND.play('tick'); say(BUB_PICK); } else SND.play('rustle',true);
+  if(o.other&&arr.includes(v)){ const inp=app.querySelector('[data-other]'); if(inp) inp.focus(); }
+}
+
+/* ====== ĐIỀU HƯỚNG ====== */
+function next(){
+  const k=S.cur;
+  const q=BY[k];
+  if(q){
+    if(!isAnswered(q)) return;
+    if(q.id==='q1'&&A().q1==='Đồng ý'&&!S.started) S.started=new Date().toISOString();
+    const opt = (q.type==='single') ? (optsOf(q).find(o=>optVal(o)===A()[q.id])) : null;
+    if(opt&&opt.end){
+      if(opt.end==='declined'){ S.cur='end-declined'; save(); return render(); }
+      if(opt.end==='screened'){ return submit('loai_sang_loc'); }
+    }
+    if(q.type==='numbers' && !S.priceWarned){
+      const v=A()[q.id]; const xs=['a','b','c','d'].map(f=>+v[f]);
+      const ok = xs.every((x,i)=>i===0||x>=xs[i-1]);
+      if(!ok){ S.priceWarned=true; const w=document.getElementById('pwarn'); w.hidden=false; w.textContent='Prices usually increase from a to d. Please double-check; if this is what you meant, press Next again.'; return; }
+    }
+  }
+  const list=stepList(); const i=list.indexOf(k);
+  if(i===list.length-1) return submit('hoan_thanh');
+  S.cur=list[i+1]; dir='enter'; save(); render();
+}
+function back(){
+  const list=stepList(); const i=list.indexOf(S.cur);
+  if(i>0){ S.cur=list[i-1]; dir='enter-back'; save(); render(); }
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('input,textarea')){ if(e.key==='Enter'&&e.target.tagName==='INPUT'){ e.preventDefault(); const b=document.getElementById('nx'); if(b&&!b.disabled) b.click(); } return; }
+  const q=BY[S.cur];
+  if(e.key==='Enter'){ const b=document.getElementById('nx')||document.getElementById('go'); if(b&&!b.disabled){ e.preventDefault(); b.click(); } return; }
+  if(!q) return;
+  if((q.type==='single'||q.type==='multi')&&/^[a-z]$/i.test(e.key)){ const i=e.key.toUpperCase().charCodeAt(0)-65; if(i<optsOf(q).length){ e.preventDefault(); pick(q,i);} }
+  if(q.type==='scale'&&/^[1-5]$/.test(e.key)){ A()[q.id]=+e.key; save(); renderSel(q); autoNext(q); }
+});
+
+/* ====== GỬI DỮ LIỆU ====== */
+function flatten(status){
+  const a=A(); const now=new Date();
+  const p={
+    response_id:S.rid||uid(), trang_thai:status, phien_ban:CONFIG.version,
+    bat_dau:S.started||'', nop_luc:now.toISOString(),
+    thoi_gian_giay: S.started? Math.round((now-new Date(S.started))/1000):'',
+    thiet_bi: (matchMedia('(pointer:coarse)').matches||/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent))?'mobile':'desktop', rong_man_hinh: window.innerWidth
+  };
+  for(const q of Q){
+    if(q.type==='concept') continue;
+    const v=a[q.id]; const vis=isVisible(q);
+    if(q.type==='grid'){ q.rows.forEach(([r])=>p[q.id+r]= vis&&v&&v[r]!=null ? v[r] : ''); continue; }
+    if(q.type==='numbers'){ q.fields.forEach(([f])=>p[q.id+f]= vis&&v&&v[f] ? +v[f] : ''); p.q41_tang_dan = vis&&v ? (['a','b','c','d'].every((f,i,arr)=>i===0||+v[f]>=+v[arr[i-1]])?1:0) : ''; continue; }
+    if(q.contact){ continue; }
+    let out = !vis||v==null ? '' : Array.isArray(v) ? v.join('; ') : v;
+    // Q20: nếu chỉ chọn đúng một trở ngại thì đó là trở ngại lớn nhất
+    if(q.id==='q20' && !out && playsWithOthers(a) && obstaclesChosen(a).length===1) out = obstaclesChosen(a)[0];
+    p[q.id]=out;
+    if(q.opts && q.opts.some(o=>o.other)) p[q.id+'_khac'] = vis ? (a[q.id+'_khac']||'') : '';
+  }
+  p.lien_he = (a.q44||'').trim();
+  return p;
+}
+
+async function post(payload){
+  const body=JSON.stringify(payload);
+  try{
+    const r=await fetch(CONFIG.endpoint,{method:'POST',body,redirect:'follow'});
+    const j=await r.json();
+    if(j&&j.ok) return true;
+    throw new Error(j&&j.error||'Invalid response');
+  }catch(e){
+    // Một số trình duyệt chặn đọc phản hồi từ Apps Script: gửi lại ở chế độ no-cors. Máy chủ bỏ qua bản trùng response_id.
+    await fetch(CONFIG.endpoint,{method:'POST',mode:'no-cors',body});
+    return true;
+  }
+}
+
+async function submit(status){
+  const payload=flatten(status);
+  S.cur='end-sending'; save(); render();
+  if(!CONFIG.endpoint){
+    console.log('[Preview] Data to be sent:', payload);
+    window.__lastPayload=payload;
+    return finish(status);
+  }
+  store.set(KEY+'_pending',payload);
+  try{ await post(payload); store.del(KEY+'_pending'); finish(status); }
+  catch(e){ S.cur='end-error'; save(); render(); }
+}
+function finish(status){
+  if(status==='hoan_thanh'){ store.set(KEY+'_done',true); S.cur='end-done'; }
+  else S.cur='end-screened';
+  const keepAnswers=S.answers; save(); store.del(KEY); S.answers=keepAnswers; render();
+}
+async function flushPending(){
+  const p=store.get(KEY+'_pending');
+  if(p&&CONFIG.endpoint){ try{ await post(p); store.del(KEY+'_pending'); }catch(e){} }
+}
+
+/* ====== MÀN KẾT THÚC ====== */
+function profile(a){
+  const myst = (a.q12||[]).filter(x=>x!=='Không tham gia hoạt động nào'&&x!=='Đọc tiểu thuyết, xem phim hoặc nghe podcast trinh thám').length;
+  if(a.q16==='Hầu như là tôi') return ['The Instigator','You’re usually the one who rallies the group and picks the game.'];
+  if(myst>=2) return ['The Mystery Buff','You seek out deduction games both on screen and in real life.'];
+  if(a.q17==='Vì được chơi cùng bạn bè') return ['The Loyal Teammate','For you, who you play with matters more than what you play.'];
+  if(a.q17==='Vì thích thử thách, giải đố') return ['The Challenger','You play to crack the hard problems.'];
+  if(a.q17==='Vì thích cốt truyện, khám phá') return ['The Story Seeker','You play to find out what happens next.'];
+  return ['The Free Spirit','You play your own way, no templates.'];
+}
+function renderEnd(kind){
+  if(kind==='sending'){ SND.play('beep'); shell(`<div class="end"><div class="scanner">${FINGER}<div class="beam"></div></div><h2>Sealing your file…</h2><p>Please keep this page open for a few seconds.</p></div>`); return; }
+  if(kind==='done' && !endRevealed){
+    shell(`<div class="end"><div class="scanner">${FINGER}<div class="beam"></div></div><h2>Analyzing your file…</h2><p class="scanlog" id="scanlog">Cross-checking clues…</p></div>`);
+    const lines=['Cross-checking clues…','Analyzing play habits…','Assigning your code name…'];
+    SND.play('beep');
+    lines.slice(1).forEach((t,i)=>setTimeout(()=>{ const el=document.getElementById('scanlog'); if(el){ el.textContent=t; SND.play('beep'); } },(i+1)*600));
+    setTimeout(()=>{ if(S.cur==='end-done'){ endRevealed=true; render(); } }, RM?300:1900);
+    return;
+  }
+  if(kind==='error'){
+    shell(`<div class="end"><div class="stamp">Not sent yet</div><h2>Connection interrupted</h2><p>Your answers are still saved on this device. Please check your connection and try again.</p><div class="share"><button class="next" id="retry">Try again</button></div></div>`);
+    document.getElementById('retry').onclick=async()=>{ const p=store.get(KEY+'_pending'); S.cur='end-sending'; render(); try{ await post(p); store.del(KEY+'_pending'); finish(p.trang_thai);}catch(e){ S.cur='end-error'; render(); } };
+    return;
+  }
+  if(kind==='declined'){ shell('<div class="end"><h2>Thank you</h2><p>You chose not to take part. No answers were saved.</p><div class="share"><button class="ghost" id="again">Back to the start</button></div></div>'); document.getElementById('again').onclick=()=>{store.del(KEY); S={answers:{},cur:'intro'}; render();}; return; }
+  if(kind==='screened'){ shell('<div class="end"><div class="stamp">Thank you</div><h2>This survey is for gamers</h2><p>This time we need input from people who have played games in the past 3 months. Thank you for your time.</p></div>'); return; }
+  const a=A(); const [role,desc]=profile(a);
+  const facts=[];
+  if(a.q18&&a.q18.length) facts.push(['Group play time',a.q18.slice(0,2).map(L).join(', ')]);
+  if(a.q11&&a.q11.length) facts.push(['Genres',a.q11.filter(x=>x!=='Khác').slice(0,2).map(x=>L(x).split(' (')[0]).join(', ')||L('Khác')]);
+  if(a.q15) facts.push(['Play group',L(a.q15).replace('Yes, ','')]);
+  if(a.q23) facts.push(['Weekday evenings',L(a.q23)]);
+  shell(`
+    <div class="end hit">
+      <div class="stamp">Recorded</div>
+      <h2>Thanks for completing your file</h2>
+      <p>Your answers help us understand what players really need when playing with friends.</p>
+      <div class="idcard flip"><div class="hd"><span>Investigator ID card</span><span>#${(S.rid||'000000').slice(0,6).toUpperCase()}</span></div>
+        <div class="bd"><div class="lbl">Your code name</div><div class="role">${esc(role)}</div><div class="desc">${esc(desc)}</div>
+        ${facts.length?'<dl>'+facts.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')+'</dl>':''}</div></div>
+      <div class="share"><button class="ghost" id="copy">Copy the survey link to share with friends</button><span class="small" id="copied"></span></div>
+    </div>`);
+  setTimeout(()=>say(['all done!','awesome']),1500);
+  setTimeout(confetti,380); SND.play('stamp',null,300); SND.play('rustle',null,420); SND.play('chime',null,1000);
+  document.getElementById('copy').onclick=async()=>{
+    const el=document.getElementById('copied');
+    try{ await navigator.clipboard.writeText(location.href.split('#')[0]); el.textContent='Copied.'; }
+    catch(e){ el.textContent=location.href.split('#')[0]; }
+  };
+}
+
+/* ====== KHỞI ĐỘNG ====== */
+document.getElementById('preview').hidden=!!CONFIG.endpoint;
+if(!RM && matchMedia('(hover:hover) and (pointer:fine)').matches){
+  let raf=0;
+  addEventListener('mousemove',e=>{ if(raf) return; raf=requestAnimationFrame(()=>{ raf=0;
+    const c=app.querySelector('.card:not(.leaving)'); if(!c) return;
+    c.style.setProperty('--my',((e.clientX/innerWidth-.5)*3).toFixed(2)+'deg');
+    c.style.setProperty('--mx',((.5-e.clientY/innerHeight)*3).toFixed(2)+'deg'); }); });
+}
+addEventListener('pointerdown',e=>{ SND.unlock(); look(e.clientX,e.clientY); },{capture:true});
+addEventListener('pointermove',e=>{ if(e.pointerType==='mouse') look(e.clientX,e.clientY); },{passive:true});
+addEventListener('keydown',()=>SND.unlock(),{capture:true});
+let lastPen=0;
+document.addEventListener('input',e=>{
+  if(!e.target.matches || !e.target.matches('.txt')) return;
+  const now=performance.now(); if(now-lastPen<45) return; lastPen=now;
+  SND.play(e.inputType && e.inputType.startsWith('delete') ? 'erase' : 'write');
+},true);
+updSnd(); document.getElementById('snd').onclick=()=>{ SND.toggle(); updSnd(); };
+flushPending();
+function startApp(){
+  const g=document.createElement('div'); g.className='gate'; g.setAttribute('role','dialog'); g.setAttribute('aria-label','Open the survey file');
+  g.innerHTML=`<div class="gbox"><div class="gkick">Case #001 · Top secret</div><div class="gbuddy" aria-hidden="true">${BUDDY_SVG}</div><h2>A case file is waiting for you</h2><button class="next pulse" id="gateBtn" type="button">Tap to open</button><p>${SPK_ON} Turn on sound for the full experience</p></div>`;
+  document.body.appendChild(g);
+  const open=()=>{ if(g.classList.contains('out')) return; SND.unlock(); SND.play('rustle'); g.classList.add('out'); setTimeout(()=>g.remove(),400); render(); };
+  g.onclick=open;
+  const k=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); removeEventListener('keydown',k); open(); } };
+  addEventListener('keydown',k);
+}
+startApp();
+</script>
+</body>
+</html>
