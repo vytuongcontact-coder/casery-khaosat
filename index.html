@@ -367,6 +367,12 @@ body{font-family:Nunito,Arial,sans-serif}
 .opt:active,.sbtn:active,.chip:active{transform:translateY(3px)}
 .opt:active::after,.sbtn:active::after,.chip:active::after{transform:translateY(1px)}
 .opt.sel::before,.sbtn.sel::before,.chip.sel::before{background:#f8de96}
+/* đang chờ tự chuyển câu: lựa chọn vừa bấm nổi rõ, vạch đỏ chạy hết thì sang câu sau; bấm lựa chọn khác để đổi ý */
+.opt.arm,.sbtn.arm,.chip.arm{transform:translateY(-2px)}
+.opt.arm::before,.sbtn.arm::before,.chip.arm::before{border-color:var(--red)!important;background:#ffd36a;box-shadow:0 0 0 3px rgba(179,38,30,.25)}
+.armbar{position:absolute;left:10px;right:10px;bottom:5px;height:3px;border-radius:2px;background:var(--red);transform-origin:left center;transform:scaleX(0);animation:armfill var(--arm,800ms) linear forwards;pointer-events:none}
+.chip .armbar{bottom:3px;left:12px;right:12px;height:2px}
+@keyframes armfill{to{transform:scaleX(1)}}
 .sel .hl{background-size:0 0!important}
 .opt .k::before{z-index:-1;border:2.2px solid var(--ink)!important;background:#fff}
 .opt.multi.sel .k::before{background:#fff;border-color:var(--red)!important}
@@ -803,6 +809,7 @@ function setTop(){
 function render(){
   setTop();
   const k=S.cur;
+  lockUntil=performance.now()+LOCK_MS;   // màn mới: chưa nhận bấm trong LOCK_MS đầu
   document.body.classList.toggle('centered', k==='intro'||k.startsWith('end-'));
   if(k==='intro') return renderIntro();
   if(k.startsWith('end-')) return renderEnd(k.slice(4));
@@ -1005,7 +1012,7 @@ function wire(q){
     app.querySelectorAll('.opt').forEach(btn=>btn.onclick=()=>pick(q,+btn.dataset.i));
     app.querySelectorAll('[data-other]').forEach(inp=>inp.oninput=e=>{a[q.id+'_khac']=e.target.value; save();});
   }
-  if(q.type==='scale') app.querySelectorAll('.sbtn').forEach(b=>b.onclick=()=>{a[q.id]=+b.dataset.v; save(); renderSel(q); popEl(b); buzz(); SND.play('pen'); say(BUB_PICK); autoNext(q);});
+  if(q.type==='scale') app.querySelectorAll('.sbtn').forEach(b=>b.onclick=()=>{a[q.id]=+b.dataset.v; save(); renderSel(q); popEl(b); buzz(); SND.play('pen'); say(BUB_PICK); autoNext(q,b);});
   if(q.type==='grid'){
     app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{
       const g=a[q.id]=a[q.id]||{};
@@ -1017,7 +1024,7 @@ function wire(q){
       refreshNext(q);
       const nextRow = q.rows.find(r=>g[r[0]]==null);
       if(nextRow){ const el=document.getElementById('row-'+nextRow[0]); const r=el.getBoundingClientRect(); if(r.top>window.innerHeight*0.6) el.scrollIntoView({behavior:'smooth',block:'center'}); }
-      else autoNext(q);
+      else autoNext(q,b);
     });
   }
   if(q.type==='numbers'){
@@ -1037,7 +1044,21 @@ function renderSel(q){
   if(q.type==='scale') app.querySelectorAll('.sbtn').forEach(b=>b.classList.toggle('sel',+b.dataset.v===A()[q.id]));
   refreshNext(q);
 }
-function autoNext(q){ clearTimeout(autoTimer); autoTimer=setTimeout(()=>{ if(S.cur===q.id&&isAnswered(q)) next(); },560); }
+/* Tự chuyển câu, chống bấm nhầm dây chuyền:
+   - chờ AUTO_MS sau khi chọn, lựa chọn vừa bấm nổi rõ kèm vạch đếm ngược;
+   - trong lúc chờ, bấm lựa chọn khác thì đổi đáp án và đếm lại từ đầu;
+   - câu mới vừa hiện thì không nhận bấm trong LOCK_MS đầu, để cú bấm thừa không rơi vào câu mới. */
+const AUTO_MS=800, LOCK_MS=400;
+let lockUntil=0;
+const LOCKED='.opt,.sbtn,.chip,#nx,#go';
+app.addEventListener('click',e=>{ if(performance.now()<lockUntil && e.target.closest(LOCKED)){ e.stopPropagation(); e.preventDefault(); } },true);
+function disarm(){ app.querySelectorAll('.arm').forEach(x=>{ x.classList.remove('arm'); x.querySelectorAll('.armbar').forEach(b=>b.remove()); }); }
+function stopAuto(){ clearTimeout(autoTimer); autoTimer=null; disarm(); }
+function autoNext(q,el){
+  stopAuto();
+  if(el){ el.classList.add('arm'); const bar=document.createElement('span'); bar.className='armbar'; bar.style.setProperty('--arm',AUTO_MS+'ms'); el.appendChild(bar); }
+  autoTimer=setTimeout(()=>{ autoTimer=null; if(S.cur===q.id&&isAnswered(q)) next(); },AUTO_MS);
+}
 
 function pick(q,i){
   const a=A(); const opts=optsOf(q); const o=opts[i]; const v=optVal(o);
@@ -1047,7 +1068,7 @@ function pick(q,i){
     if(q.id==='q4' && cur0!==CUR()){ delete a.q6; delete a.q41; S.priceWarned=false; }
     save(); quiet=true; renderQuestion(q); quiet=false; app.firstElementChild.classList.remove('enter');
     popEl(app.querySelector(`.opt[data-i="${i}"]`)); buzz(); SND.play('pen'); say(BUB_PICK);
-    if(!o.other) autoNext(q); else { const inp=app.querySelector('[data-other]'); if(inp) inp.focus(); }
+    if(!o.other) autoNext(q,app.querySelector(`.opt[data-i="${i}"]`)); else { stopAuto(); const inp=app.querySelector('[data-other]'); if(inp) inp.focus(); }
     return;
   }
   let arr=a[q.id]||[];
@@ -1070,6 +1091,7 @@ function pick(q,i){
 
 /* ====== ĐIỀU HƯỚNG ====== */
 function next(){
+  stopAuto();
   const k=S.cur;
   const q=BY[k];
   if(q){
@@ -1091,6 +1113,7 @@ function next(){
   S.cur=list[i+1]; dir='enter'; save(); render();
 }
 function back(){
+  stopAuto();
   const list=stepList(); const i=list.indexOf(S.cur);
   if(i>0){ S.cur=list[i-1]; dir='enter-back'; save(); render(); }
 }
@@ -1098,10 +1121,11 @@ function back(){
 document.addEventListener('keydown',e=>{
   if(e.target.matches('input,textarea')){ if(e.key==='Enter'&&e.target.tagName==='INPUT'){ e.preventDefault(); const b=document.getElementById('nx'); if(b&&!b.disabled) b.click(); } return; }
   const q=BY[S.cur];
+  if(performance.now()<lockUntil){ if(e.key==='Enter'||e.key===' '||/^[a-z1-5]$/i.test(e.key)) e.preventDefault(); return; }   // câu mới vừa hiện: bỏ qua phím bấm thừa
   if(e.key==='Enter'){ const b=document.getElementById('nx')||document.getElementById('go'); if(b&&!b.disabled){ e.preventDefault(); b.click(); } return; }
   if(!q) return;
   if((q.type==='single'||q.type==='multi')&&/^[a-z]$/i.test(e.key)){ const i=e.key.toUpperCase().charCodeAt(0)-65; if(i<optsOf(q).length){ e.preventDefault(); pick(q,i);} }
-  if(q.type==='scale'&&/^[1-5]$/.test(e.key)){ A()[q.id]=+e.key; save(); renderSel(q); autoNext(q); }
+  if(q.type==='scale'&&/^[1-5]$/.test(e.key)){ A()[q.id]=+e.key; save(); renderSel(q); autoNext(q,app.querySelector(`.sbtn[data-v="${e.key}"]`)); }
 });
 
 /* ====== GỬI DỮ LIỆU ====== */
